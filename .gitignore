@@ -1,0 +1,7 @@
+*.log
+*.swp
+*.pyc
+*.out
+data/mnist-cluttered/train/
+data/mnist-cluttered/valid/
+data/mnist-cluttered/test/
