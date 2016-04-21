@@ -2,6 +2,6 @@
 *.swp
 *.pyc
 *.out
-data/mnist-cluttered/train/
-data/mnist-cluttered/valid/
-data/mnist-cluttered/test/
+data/mnist-cluttered/train/*.png
+data/mnist-cluttered/valid/*.png
+data/mnist-cluttered/test/*.png

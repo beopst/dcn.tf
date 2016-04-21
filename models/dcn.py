@@ -179,7 +179,7 @@ def inference(inputs, is_training=True, scope=''):
         merged, flat_coarse, flat_fine = replace_features(coarse_features, fine_features, src_idxs)
 
         # add additional L2 norm to LOSSES_COLLECTION
-        losses.l2_loss(flat_coarse - flat_fine, scope='objective_hint')
+        losses.l2_loss(flat_coarse - tf.stop_gradient(flat_fine), weight=0.1, scope='objective_hint')
        
         final_logits = top_layers(merged)
 

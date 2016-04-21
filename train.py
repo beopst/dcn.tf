@@ -20,8 +20,8 @@ from random import shuffle
 
 ################### Parameters #######################
 BATCH_SIZE = 64
-NUM_EPOCHS = 15
-NUM_EPOCHS_PER_DECAY = 10
+NUM_EPOCHS = 100
+NUM_EPOCHS_PER_DECAY = 50
 INITIAL_LEARNING_RATE = 0.01
 LEARNING_RATE_DECAY = 0.1
 ######################################################
