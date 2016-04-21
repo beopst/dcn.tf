@@ -1,19 +1,13 @@
 from __future__ import division
 
-import gflags
 import os, glob
-import time, random
-import tensorflow as tf
+import random
 import numpy as np
 from skimage import io
 from skimage import img_as_float
 
-import ipdb
-FLAGS = gflags.FLAGS
-
 def load_data(src,shuffle=True):
-    """
-        load lines in csv file as a list of strings
+    """ Load data from directories.
     """
 
     imgs = [img for img in glob.glob(os.path.join(src,'*.png'))]

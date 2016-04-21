@@ -21,8 +21,8 @@ from random import shuffle
 ################### Parameters #######################
 BATCH_SIZE = 64
 NUM_EPOCHS = 100
-NUM_EPOCHS_PER_DECAY = 50
-INITIAL_LEARNING_RATE = 0.01
+NUM_EPOCHS_PER_DECAY = 40
+INITIAL_LEARNING_RATE = 0.001
 LEARNING_RATE_DECAY = 0.1
 ######################################################
 
@@ -46,30 +46,33 @@ def train():
     num_batches_for_epoch = int(np.ceil(n_trn/BATCH_SIZE))
     decay_steps = int(num_batches_for_epoch * NUM_EPOCHS_PER_DECAY)
 
-    trn_x = tf.placeholder(tf.float32, shape=(BATCH_SIZE, 100, 100, 1))
-    trn_y = tf.placeholder(tf.int32, shape=(BATCH_SIZE,))
-    val_x = tf.placeholder(tf.float32, shape=(50, 100, 100, 1))
+    with tf.device('/gpu:1'):
 
-    logits = dcn.inference(trn_x)
-    dcn.loss(logits,trn_y,batch_size=BATCH_SIZE)
+        trn_x = tf.placeholder(tf.float32, shape=(BATCH_SIZE, 100, 100, 1))
+        trn_y = tf.placeholder(tf.int32, shape=(BATCH_SIZE,))
+        val_x = tf.placeholder(tf.float32, shape=(50, 100, 100, 1))
+
+        logits = dcn.inference(trn_x)
+        dcn.loss(logits,trn_y,batch_size=BATCH_SIZE)
 
 
-    total_loss = tf.add_n(tf.get_collection(slim.losses.LOSSES_COLLECTION))
-    batchnorm_updates = tf.get_collection(slim.ops.UPDATE_OPS_COLLECTION)
-    batchnorm_updates_op = tf.group(*batchnorm_updates)
+        total_loss = tf.add_n(tf.get_collection(slim.losses.LOSSES_COLLECTION))
+        batchnorm_updates = tf.get_collection(slim.ops.UPDATE_OPS_COLLECTION)
+        batchnorm_updates_op = tf.group(*batchnorm_updates)
 
-    lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE, 
-                                    step_counter, decay_steps, 
-                                    LEARNING_RATE_DECAY, 
-                                    staircase=True)
-    #optimizer = tf.train.MomentumOptimizer(lr,0.9).minimize(total_loss,
-    #                                                          global_step=step_counter)
-    optimizer = tf.train.AdamOptimizer(lr).minimize(total_loss,
-                                                    global_step=step_counter)
-   
-    train_op = tf.group(optimizer,batchnorm_updates_op)
+        lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE, 
+                                        step_counter, decay_steps, 
+                                        LEARNING_RATE_DECAY, 
+                                        staircase=True)
+        #optimizer = tf.train.MomentumOptimizer(lr,0.9).minimize(total_loss,
+        #                                                          global_step=step_counter)
+        optimizer = tf.train.AdamOptimizer(lr).minimize(total_loss,
+                                                        global_step=step_counter)
+       
+        train_op = tf.group(optimizer,batchnorm_updates_op)
     # create Session
-    sess = tf.Session()
+    sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+    summary_writer = tf.train.SummaryWriter('./trials',sess.graph)
     tf.initialize_all_variables().run(session=sess)
 
     eval_logits = dcn.inference(val_x,is_training=False)

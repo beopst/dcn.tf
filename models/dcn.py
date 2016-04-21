@@ -17,7 +17,7 @@ def top_layers(inputs):
     out = ops.max_pool(out, [fm_size,fm_size], stride=1, scope='top_gpool')
 
     out = ops.flatten(out, scope='top_flatten')
-    out = ops.fc(out, 10, activation=None, bias=None, batch_norm_params=None, scope='top_logits')
+    out = ops.fc(out, 10, activation=None, bias=0.0, scope='top_logits')
 
     return out
 
@@ -147,7 +147,7 @@ def replace_features(coarse_features, fine_features, replace_idxs):
 
     # extract coarse features to be replaced
     # this is required for hint-based training
-    flat_coarse_replaced = tf.gather(flat_coarse_features, flat_fine_idxs)
+    flat_coarse_replaced = tf.stop_gradient(tf.gather(flat_coarse_features, flat_fine_idxs))
 
     merged = tf.dynamic_stitch([tf.range(0,flat_coarse_features.get_shape()[0]),flat_fine_idxs],
             [flat_coarse_features,flat_fine_features])
@@ -160,7 +160,7 @@ def inference(inputs, is_training=True, scope=''):
 
     batch_norm_params = {'decay': 0.9, 'epsilon': 0.001}
 
-    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.0001, 
+    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.0,
                           is_training=is_training, batch_norm_params=batch_norm_params):
         # get features from coarse layers
         coarse_features = coarse_layers(inputs)
@@ -179,7 +179,7 @@ def inference(inputs, is_training=True, scope=''):
         merged, flat_coarse, flat_fine = replace_features(coarse_features, fine_features, src_idxs)
 
         # add additional L2 norm to LOSSES_COLLECTION
-        losses.l2_loss(flat_coarse - tf.stop_gradient(flat_fine), weight=0.1, scope='objective_hint')
+        #losses.l2_loss(flat_coarse - tf.stop_gradient(flat_fine), weight=0.001, scope='objective_hint')
        
         final_logits = top_layers(merged)
 
