@@ -6,6 +6,11 @@ Dynamic Capacity Networks (DCN; http://arxiv.org/abs/1511.07838) implementation 
 
 * [Cluttered MNIST](https://github.com/deepmind/mnist-cluttered)
 
+## NOTES
+
+* Computation time issue
+Although DCN can greatly reduce the number of computations, it may consume more computation time since it requires sequantial processes (extract input patches of interest, and then feed them into high-capacity networks). Computation time can be reduced if the input patches are concatenated for convolution.
+
 ## Logs
 * Coarse Model
 ```
