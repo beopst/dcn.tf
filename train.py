@@ -21,10 +21,10 @@ from random import shuffle
 ################### Parameters #######################
 BATCH_SIZE = 64
 NUM_EPOCHS = 100
-NUM_EPOCHS_PER_DECAY = 30
-INITIAL_LEARNING_RATE = 0.001
+NUM_EPOCHS_PER_DECAY = 40
+INITIAL_LEARNING_RATE = 0.01
 LEARNING_RATE_DECAY = 0.1
-HINT_WEIGHT = 0.0000
+HINT_WEIGHT = 0.0
 ######################################################
 
 
@@ -43,7 +43,7 @@ def train():
     val_data_x, val_data_y = zip(*val_data)
     n_val = len(val_data)
 
-    step_counter = tf.Variable(0, tranable=False)
+    step_counter = tf.Variable(0, trainable=False)
     num_batches_for_epoch = int(np.ceil(n_trn/BATCH_SIZE))
     decay_steps = int(num_batches_for_epoch * NUM_EPOCHS_PER_DECAY)
 
@@ -72,13 +72,16 @@ def train():
 
         top_vars = slim.variables.get_variables('top_layers')
         fine_vars = slim.variables.get_variables('fine_layers')
+        #fine_vars = []
         coarse_vars = slim.variables.get_variables('coarse_layers')
+        #coarse_vars = []
 
         optimizer = tf.train.AdamOptimizer(lr)
         top_fine_grads = optimizer.compute_gradients(total_loss, 
           var_list=top_vars + fine_vars)
         coarse_grads = optimizer.compute_gradients(total_loss + hint_loss * HINT_WEIGHT, 
           var_list=coarse_vars)
+        #coarse_grads = []
 
         apply_gradients = optimizer.apply_gradients(top_fine_grads + coarse_grads, global_step=step_counter)
         train_op = tf.group(apply_gradients, batchnorm_updates_op)
@@ -100,7 +103,7 @@ def train():
             predictions[begin:end,:] = sess.run(eval_prediction, feed_dict=feed_dict)
         return predictions
 
-    start_time = time.time()
+    elapsed_trn_time = 0
     for step in xrange(NUM_EPOCHS*num_batches_for_epoch+1):
 
         if step % num_batches_for_epoch == 0:
@@ -109,26 +112,28 @@ def train():
             trn_data_x, trn_data_y = zip(*trn_data)
        
             # validation
+            start_time = time.time()
             predictions = _evaluate(np.asarray(val_data_x,dtype=np.float32),sess)
             eval_error = error_rate(predictions, np.asarray(val_data_y))
+            elapsed_val_time = time.time() - start_time
 
-            elapsed_time = time.time() - start_time
-            start_time = time.time()
             print '\n[Validation] Epoch: %.2f, Elapsed: %.1f ms, Error: %.2f\n' \
-                  % (float(step)/num_batches_for_epoch, 1000*elapsed_time, eval_error)
+                  % (float(step)/num_batches_for_epoch, 1000*elapsed_val_time, eval_error)
 
         offset = (step * BATCH_SIZE) % (n_trn - BATCH_SIZE)
         batch_x = np.asarray(trn_data_x[offset:(offset+BATCH_SIZE)],dtype=np.float32)
         batch_y = np.asarray(trn_data_y[offset:(offset+BATCH_SIZE)],dtype=np.int32)
 
+        start_time = time.time()
         _, res_lr, res_loss, res_hint= sess.run([train_op,lr,total_loss, hint_loss], 
                                        feed_dict={trn_x:batch_x,trn_y:batch_y})
+        elapsed_trn_time += time.time() - start_time
 
         if step % 100 == 0:
-            elapsed_time = time.time() - start_time
-            start_time = time.time()
             print 'Step %d (epoch %.2f), Elapsed: %.1f ms, LR: %.4f, Loss: %.4f Hint loss: %.4f' % \
-                  (step, float(step)/num_batches_for_epoch, 1000*elapsed_time, res_lr, res_loss, res_hint)
+                  (step, float(step)/num_batches_for_epoch, 1000*elapsed_trn_time, res_lr, res_loss, res_hint)
+            elapsed_trn_time = 0
+
 
 
     import ipdb

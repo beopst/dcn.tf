@@ -18,7 +18,7 @@ def top_layers(inputs):
         out = ops.max_pool(out, [fm_size,fm_size], stride=1, scope='top_gpool')
 
         out = ops.flatten(out, scope='top_flatten')
-        out = ops.fc(out, 10, activation=None, bias=0.0, scope='top_logits')
+        out = ops.fc(out, 10, activation=None, scope='top_logits')
 
     return out
 
@@ -161,18 +161,25 @@ def replace_features(coarse_features, fine_features, replace_idxs):
     # this is required for hint-based training
     flat_coarse_replaced = tf.gather(flat_coarse_features, flat_fine_idxs)
 
+#    # partition valid nodes for coarse layers
+#    tmp_dim = flat_coarse_features.get_shape()[0].value
+#    partition_idxs = tf.sparse_to_dense(flat_fine_idxs,[tmp_dim,],0.0,1.0,validate_indices=False)
+#    tmp_coarse = tf.mul(flat_coarse_features,partition_idxs)
+#    tmp_fine = tf.sparse_to_dense(flat_fine_idxs,[tmp_dim,],flat_fine_features,0.0,validate_indices=False)
+#    merged = tf.add(tmp_coarse,tmp_fine)
+
     merged = tf.dynamic_stitch([tf.range(0,flat_coarse_features.get_shape()[0]),flat_fine_idxs],
             [flat_coarse_features,flat_fine_features])
 
     merged = tf.reshape(merged,coarse_features.get_shape())
 
-    return merged, flat_coarse_replaced, flat_fine_features 
+    return merged, flat_coarse_replaced, flat_fine_features
 
 def inference(inputs, is_training=True, scope=''):
 
     batch_norm_params = {'decay': 0.9, 'epsilon': 0.001}
 
-    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.0001,
+    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.0000,
                           is_training=is_training, batch_norm_params=batch_norm_params):
         # get features from coarse layers
         coarse_features = coarse_layers(inputs)
@@ -181,21 +188,23 @@ def inference(inputs, is_training=True, scope=''):
         # calculate saliency scores and extract top k
         coarse_output = top_layers(coarse_features)
         coarse_h = entropy(tf.nn.softmax(coarse_output))
-        coarse_grads = tf.gradients(coarse_h, coarse_features)
+        coarse_grads = tf.gradients(coarse_h, coarse_features, name='gradient_entropy')
         top_k_values, top_k_idxs, M = identify_saliency(coarse_grads[0])
 
-        # get features from fine layers
-        fine_features, src_idxs, _ = extract_features(inputs, top_k_idxs, coarse_features_dim)
+        with tf.control_dependencies([top_k_idxs]):
+            # get features from fine layers
+            fine_features, src_idxs, _ = extract_features(inputs, top_k_idxs, coarse_features_dim)
 
-        # merge two feature maps
-        merged, flat_coarse, flat_fine = replace_features(coarse_features, fine_features, src_idxs)
+            with tf.control_dependencies(fine_features):
+                # merge two feature maps
+                merged, flat_coarse, flat_fine = replace_features(coarse_features, fine_features, src_idxs)
 
-        raw_hint_loss = tf.reduce_sum(tf.square(flat_coarse - flat_fine), name='raw_hint_loss')
-        # scale hint loss per example in batch
-        # still does not match range of 5-25 shown in figure 2 in paper???
-        hint_loss = tf.div( raw_hint_loss, inputs.get_shape()[0].value, name='objective_hint')
-       
-        final_logits = top_layers(merged)
+                raw_hint_loss = tf.reduce_sum(tf.square(flat_coarse - flat_fine), name='raw_hint_loss')
+                # scale hint loss per example in batch
+                # still does not match range of 5-25 shown in figure 2 in paper???
+                hint_loss = tf.div( raw_hint_loss, inputs.get_shape()[0].value*N_PATCHES, name='objective_hint')
+               
+                final_logits = top_layers(merged)
 
     return final_logits, hint_loss
 
