@@ -8,7 +8,7 @@ Dynamic Capacity Networks (DCN; http://arxiv.org/abs/1511.07838) implementation 
 
 ## Logs
 * Coarse Model
-'''
+```
 [Validation] Epoch: 97.00, Elapsed: 713.6 ms, Error: 2.24
 
 Step 75900 (epoch 97.06), Elapsed: 2586.6 ms, LR: 0.0000, Loss: 0.4766 Hint loss: 0.0000
@@ -42,10 +42,10 @@ Step 78000 (epoch 99.74), Elapsed: 2577.6 ms, LR: 0.0000, Loss: 0.4457 Hint loss
 Step 78100 (epoch 99.87), Elapsed: 2583.2 ms, LR: 0.0000, Loss: 0.3910 Hint loss: 0.0000
 
 [Validation] Epoch: 100.00, Elapsed: 717.6 ms, Error: 2.27
-'''
+```
 
 * Fine Model
-'''
+```
 [Validation] Epoch: 97.00, Elapsed: 2664.2 ms, Error: 1.05
 
 Step 75900 (epoch 97.06), Elapsed: 9383.1 ms, LR: 0.0000, Loss: 0.4106 Hint loss: 0.0000
@@ -79,6 +79,4 @@ Step 78000 (epoch 99.74), Elapsed: 9399.7 ms, LR: 0.0000, Loss: 0.3441 Hint loss
 Step 78100 (epoch 99.87), Elapsed: 9401.5 ms, LR: 0.0000, Loss: 0.3542 Hint loss: 0.0000
 
 [Validation] Epoch: 100.00, Elapsed: 2676.4 ms, Error: 1.07
-'''
-
-
+```
