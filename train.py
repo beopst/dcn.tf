@@ -1,7 +1,7 @@
 '''
 Dynamic Capacity Networks (http://arxiv.org/abs/1511.07838) implementation using TensorFlow and slim library.
 
-This code is using the cluttered MNITS dataset, which can be obtained in https://github.com/deepmind/mnist-cluttered.
+This code is using the cluttered MNIST dataset, which can be obtained in https://github.com/deepmind/mnist-cluttered.
 
 Author: Sangheum Hwang
 '''

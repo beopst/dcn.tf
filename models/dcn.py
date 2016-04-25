@@ -179,7 +179,7 @@ def inference(inputs, is_training=True, scope=''):
 
     batch_norm_params = {'decay': 0.9, 'epsilon': 0.001}
 
-    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.0000,
+    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.0001,
                           is_training=is_training, batch_norm_params=batch_norm_params):
         # get features from coarse layers
         coarse_features = coarse_layers(inputs)
