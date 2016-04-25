@@ -103,16 +103,18 @@ def extract_features(inputs, k_idxs, map_h):
         
         src_idxs = tf.concat(1,[idx_i,idx_j])
 
-        return fine_features, src_idxs
+        return fine_features, src_idxs, patches
 
     k_features = []
     k_src_idxs = []
+    k_patches = []
     for i in xrange(N_PATCHES):
-        fine_feature, src_idx = _extract_feature(inputs,k_idxs[:,i])
+        fine_feature, src_idx, patches = _extract_feature(inputs,k_idxs[:,i])
         k_features.append(fine_feature)
         k_src_idxs.append(src_idx)
+        k_patches.append(patches)
 
-    return k_features, k_src_idxs
+    return k_features, k_src_idxs, k_patches
 
 
 
@@ -121,15 +123,21 @@ def replace_features(coarse_features, fine_features, replace_idxs):
 
         Trick.
             use tf.dynamic_stitch ops
+
     """
-    
+   
+    # TODO: simplify indexing 
     def _convert_to_1d_idxs(src_idxs):
         """ Convert 2D idxs to 1D idxs 
             within 1D tensor whose shape is (b*h*w*c)
         """
+        batch_idx_len = map_channel.value * map_width.value * map_height.value
+        batch_idx_base = [i*batch_idx_len for i in xrange(batch_size.value)]
 
         batch_1d = map_channel.value * map_width.value * src_idxs[:,0] + \
                    map_channel.value * src_idxs[:,1]
+        batch_1d = tf.add(batch_1d,batch_idx_base)
+        
         flat_idxs = [batch_1d+i for i in xrange(map_channel.value)]
         flat_idxs = tf.reshape(tf.transpose(tf.pack(flat_idxs)), [-1])
 
@@ -141,6 +149,7 @@ def replace_features(coarse_features, fine_features, replace_idxs):
     flat_coarse_features = tf.reshape(coarse_features, [batch_size.value,-1])
     flat_coarse_features = tf.reshape(flat_coarse_features, [-1])
 
+
     # flatten fine features
     flat_fine_features = [tf.reshape(i,[-1]) for i in fine_features]
     flat_fine_features = tf.concat(0,flat_fine_features)
@@ -150,14 +159,14 @@ def replace_features(coarse_features, fine_features, replace_idxs):
 
     # extract coarse features to be replaced
     # this is required for hint-based training
-    flat_coarse_replaced = tf.stop_gradient(tf.gather(flat_coarse_features, flat_fine_idxs))
+    flat_coarse_replaced = tf.gather(flat_coarse_features, flat_fine_idxs)
 
     merged = tf.dynamic_stitch([tf.range(0,flat_coarse_features.get_shape()[0]),flat_fine_idxs],
             [flat_coarse_features,flat_fine_features])
 
     merged = tf.reshape(merged,coarse_features.get_shape())
 
-    return merged, flat_coarse_replaced, flat_fine_features
+    return merged, flat_coarse_replaced, flat_fine_features 
 
 def inference(inputs, is_training=True, scope=''):
 
@@ -176,7 +185,7 @@ def inference(inputs, is_training=True, scope=''):
         top_k_values, top_k_idxs, M = identify_saliency(coarse_grads[0])
 
         # get features from fine layers
-        fine_features, src_idxs = extract_features(inputs, top_k_idxs, coarse_features_dim)
+        fine_features, src_idxs, _ = extract_features(inputs, top_k_idxs, coarse_features_dim)
 
         # merge two feature maps
         merged, flat_coarse, flat_fine = replace_features(coarse_features, fine_features, src_idxs)
