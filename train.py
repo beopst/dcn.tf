@@ -21,9 +21,10 @@ from random import shuffle
 ################### Parameters #######################
 BATCH_SIZE = 64
 NUM_EPOCHS = 100
-NUM_EPOCHS_PER_DECAY = 40
+NUM_EPOCHS_PER_DECAY = 5
 INITIAL_LEARNING_RATE = 0.001
-LEARNING_RATE_DECAY = 0.1
+LEARNING_RATE_DECAY = 0.5
+HINT_WEIGHT = 0.0001
 ######################################################
 
 
@@ -52,11 +53,13 @@ def train():
         trn_y = tf.placeholder(tf.int32, shape=(BATCH_SIZE,))
         val_x = tf.placeholder(tf.float32, shape=(50, 100, 100, 1))
 
-        logits = dcn.inference(trn_x)
+        logits, hint_loss = dcn.inference(trn_x)
         dcn.loss(logits,trn_y,batch_size=BATCH_SIZE)
 
-
-        total_loss = tf.add_n(tf.get_collection(slim.losses.LOSSES_COLLECTION))
+        #slim doesn't keep regularization losses in the LOSSES_COLLECTION
+        #see line 203 in slim/variables.py
+        total_loss = tf.add_n(tf.get_collection(slim.losses.LOSSES_COLLECTION) + 
+            tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
         batchnorm_updates = tf.get_collection(slim.ops.UPDATE_OPS_COLLECTION)
         batchnorm_updates_op = tf.group(*batchnorm_updates)
 
@@ -66,16 +69,26 @@ def train():
                                         staircase=True)
         #optimizer = tf.train.MomentumOptimizer(lr,0.9).minimize(total_loss,
         #                                                          global_step=step_counter)
-        optimizer = tf.train.AdamOptimizer(lr).minimize(total_loss,
-                                                        global_step=step_counter)
-       
-        train_op = tf.group(optimizer,batchnorm_updates_op)
+        optimizer = tf.train.AdamOptimizer(lr)
+
+        top_vars = slim.variables.get_variables('top_layers')
+        fine_vars = slim.variables.get_variables('fine_layers')
+        coarse_vars = slim.variables.get_variables('coarse_layers')
+        
+        optimizer = tf.train.AdamOptimizer(lr)
+        top_fine_grads = optimizer.compute_gradients(total_loss, 
+          var_list=top_vars + fine_vars)
+        coarse_grads = optimizer.compute_gradients(total_loss + hint_loss * HINT_WEIGHT, 
+          var_list=coarse_vars)
+
+        apply_gradients = optimizer.apply_gradients(top_fine_grads + coarse_grads, global_step=step_counter)
+        train_op = tf.group(apply_gradients, batchnorm_updates_op)
     # create Session
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
     summary_writer = tf.train.SummaryWriter('./trials',sess.graph)
     tf.initialize_all_variables().run(session=sess)
 
-    eval_logits = dcn.inference(val_x,is_training=False)
+    eval_logits, eval_hint_loss = dcn.inference(val_x,is_training=False)
     eval_prediction = tf.nn.softmax(eval_logits)
     def _evaluate(data, sess):
         size = data.shape[0]
@@ -103,14 +116,14 @@ def train():
         batch_x = np.asarray(trn_data_x[offset:(offset+BATCH_SIZE)],dtype=np.float32)
         batch_y = np.asarray(trn_data_y[offset:(offset+BATCH_SIZE)],dtype=np.int32)
 
-        _, res_lr, res_loss = sess.run([train_op,lr,total_loss], 
+        _, res_lr, res_loss, res_hint= sess.run([train_op,lr,total_loss, hint_loss], 
                                        feed_dict={trn_x:batch_x,trn_y:batch_y})
 
         if step % 100 == 0:
             elapsed_time = time.time() - start_time
             start_time = time.time()
-            print 'Step %d (epoch %.2f), Elapsed: %.1f ms, LR: %.4f, Loss: %.4f' % \
-                  (step, float(step)/num_batches_for_epoch, 1000*elapsed_time, res_lr, res_loss)
+            print 'Step %d (epoch %.2f), Elapsed: %.1f ms, LR: %.4f, Loss: %.4f Hint loss: %.4f' % \
+                  (step, float(step)/num_batches_for_epoch, 1000*elapsed_time, res_lr, res_loss, res_hint)
 
 
     import ipdb
