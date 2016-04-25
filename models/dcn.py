@@ -12,38 +12,41 @@ N_PATCHES = 8
 
 def top_layers(inputs):
 
-    out = ops.conv2d(inputs, 96, [4,4], stride=2, scope='top_conv1')
-    _,fm_size,fm_size,_ = out.get_shape()
-    out = ops.max_pool(out, [fm_size,fm_size], stride=1, scope='top_gpool')
+    with tf.variable_scope('top_layers'):
+        out = ops.conv2d(inputs, 96, [4,4], stride=2, scope='top_conv1')
+        _,fm_size,fm_size,_ = out.get_shape()
+        out = ops.max_pool(out, [fm_size,fm_size], stride=1, scope='top_gpool')
 
-    out = ops.flatten(out, scope='top_flatten')
-    out = ops.fc(out, 10, activation=None, bias=0.0, scope='top_logits')
+        out = ops.flatten(out, scope='top_flatten')
+        out = ops.fc(out, 10, activation=None, bias=0.0, scope='top_logits')
 
     return out
 
 def coarse_layers(inputs):
 
-    out = ops.conv2d(inputs, 12, [7,7], stride=2, padding='VALID', scope='coarse_conv1')
-    out = ops.conv2d(out, 24, [3,3], stride=2, padding='VALID', scope='coarse_conv2')
+    with tf.variable_scope('coarse_layers'):
+        out = ops.conv2d(inputs, 12, [7,7], stride=2, padding='VALID', scope='coarse_conv1')
+        out = ops.conv2d(out, 24, [3,3], stride=2, padding='VALID', scope='coarse_conv2')
 
     return out
 
 def fine_layers(inputs):
 
-    out = ops.conv2d(inputs, 24, [3,3], stride=1, padding='VALID', scope='fine_conv1')
-    out = ops.conv2d(out, 24, [3,3], stride=1, padding='VALID', scope='fine_conv2')
-    out = tf.pad(out, [[0,0],[1,1],[1,1],[0,0]])
+    with tf.variable_scope('fine_layers'):
+        out = ops.conv2d(inputs, 24, [3,3], stride=1, padding='VALID', scope='fine_conv1')
+        out = ops.conv2d(out, 24, [3,3], stride=1, padding='VALID', scope='fine_conv2')
+        out = tf.pad(out, [[0,0],[1,1],[1,1],[0,0]])
 
-    out = ops.max_pool(out, [2,2], stride=2, scope='fine_pool1')
-    
-    out = ops.conv2d(out, 24, [3,3], stride=1, padding='VALID', scope='fine_conv3')
-    out = tf.pad(out, [[0,0],[1,1],[1,1],[0,0]])
-    out = ops.conv2d(out, 24, [3,3], stride=1, padding='VALID', scope='fine_conv4')
-    out = tf.pad(out, [[0,0],[1,1],[1,1],[0,0]])
+        out = ops.max_pool(out, [2,2], stride=2, scope='fine_pool1')
+        
+        out = ops.conv2d(out, 24, [3,3], stride=1, padding='VALID', scope='fine_conv3')
+        out = tf.pad(out, [[0,0],[1,1],[1,1],[0,0]])
+        out = ops.conv2d(out, 24, [3,3], stride=1, padding='VALID', scope='fine_conv4')
+        out = tf.pad(out, [[0,0],[1,1],[1,1],[0,0]])
 
-    out = ops.max_pool(out, [2,2], stride=2, scope='fine_pool2')
+        out = ops.max_pool(out, [2,2], stride=2, scope='fine_pool2')
 
-    out = ops.conv2d(out, 24, [3,3], stride=1, padding='VALID', scope='fine_conv5')
+        out = ops.conv2d(out, 24, [3,3], stride=1, padding='VALID', scope='fine_conv5')
 
     return out
 
@@ -160,7 +163,7 @@ def inference(inputs, is_training=True, scope=''):
 
     batch_norm_params = {'decay': 0.9, 'epsilon': 0.001}
 
-    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.0,
+    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.0001,
                           is_training=is_training, batch_norm_params=batch_norm_params):
         # get features from coarse layers
         coarse_features = coarse_layers(inputs)
@@ -178,12 +181,14 @@ def inference(inputs, is_training=True, scope=''):
         # merge two feature maps
         merged, flat_coarse, flat_fine = replace_features(coarse_features, fine_features, src_idxs)
 
-        # add additional L2 norm to LOSSES_COLLECTION
-        #losses.l2_loss(flat_coarse - tf.stop_gradient(flat_fine), weight=0.001, scope='objective_hint')
+        raw_hint_loss = tf.reduce_sum(tf.square(flat_coarse - flat_fine), name='raw_hint_loss')
+        # scale hint loss per example in batch
+        # still does not match range of 5-25 shown in figure 2 in paper???
+        hint_loss = tf.div( raw_hint_loss, inputs.get_shape()[0].value, name='objective_hint')
        
         final_logits = top_layers(merged)
 
-    return final_logits
+    return final_logits, hint_loss
 
 def loss(logits, labels, batch_size):
 
