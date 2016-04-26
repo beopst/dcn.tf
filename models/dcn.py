@@ -13,12 +13,12 @@ N_PATCHES = 8
 def top_layers(inputs):
 
     with tf.variable_scope('top_layers'):
-        out = ops.conv2d(inputs, 96, [4,4], stride=2, scope='top_conv1')
+        out = ops.conv2d(inputs, 96, [4,4], stride=2,padding='VALID', scope='top_conv1')
         _,fm_size,fm_size,_ = out.get_shape()
         out = ops.max_pool(out, [fm_size,fm_size], stride=1, scope='top_gpool')
 
         out = ops.flatten(out, scope='top_flatten')
-        out = ops.fc(out, 10, activation=None, scope='top_logits')
+        out = ops.fc(out, 10, activation=None, bias=0.0, batch_norm_params=None, scope='top_logits')
 
     return out
 
@@ -64,7 +64,8 @@ def identify_saliency(grads):
             use tf.nn.top_k ops to extract position indices
     """
 
-    M = tf.sqrt(tf.reduce_sum(tf.mul(grads,grads),3))
+    #M = tf.sqrt(tf.reduce_sum(tf.mul(grads,grads),3))
+    M = tf.sqrt(tf.reduce_sum(tf.square(grads),3))
     top_k_values, top_k_idxs = tf.nn.top_k(ops.flatten(M), N_PATCHES)
 
     return top_k_values, top_k_idxs, M
@@ -159,7 +160,7 @@ def replace_features(coarse_features, fine_features, replace_idxs):
 
     # extract coarse features to be replaced
     # this is required for hint-based training
-    flat_coarse_replaced = tf.gather(flat_coarse_features, flat_fine_idxs)
+    flat_coarse_replaced = tf.gather(flat_coarse_features, flat_fine_idxs, validate_indices=False)
 
 #    # partition valid nodes for coarse layers
 #    tmp_dim = flat_coarse_features.get_shape()[0].value
@@ -179,7 +180,7 @@ def inference(inputs, is_training=True, scope=''):
 
     batch_norm_params = {'decay': 0.9, 'epsilon': 0.001}
 
-    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.0001,
+    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.001,
                           is_training=is_training, batch_norm_params=batch_norm_params):
         # get features from coarse layers
         coarse_features = coarse_layers(inputs)

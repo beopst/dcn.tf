@@ -186,6 +186,7 @@ def conv2d(inputs,
     #weights_initializer = tf.truncated_normal_initializer(stddev=stddev)
     stddev = math.sqrt(2./(kernel_size[0]*kernel_size[1]*num_filters_out))
     weights_initializer = tf.random_normal_initializer(stddev=stddev)
+    #weights_initializer = tf.constant_initializer(0.2)
     l2_regularizer = lambda t: losses.l2_loss(t, weight_decay)
     weights = variables.variable('weights',
                                  shape=weights_shape,
@@ -260,6 +261,7 @@ def fc(inputs,
     weights_shape = [num_units_in, num_units_out]
     #weights_initializer = tf.truncated_normal_initializer(stddev=stddev)
     weights_initializer = tf.random_normal_initializer(stddev=stddev)
+    #weights_initializer = tf.constant_initializer(value=0.5)
     l2_regularizer = lambda t: losses.l2_loss(t, weight_decay)
     weights = variables.variable('weights',
                                  shape=weights_shape,
