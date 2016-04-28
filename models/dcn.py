@@ -18,7 +18,8 @@ def top_layers(inputs):
         out = ops.max_pool(out, [fm_size,fm_size], stride=1, scope='top_gpool')
 
         out = ops.flatten(out, scope='top_flatten')
-        out = ops.fc(out, 10, activation=None, bias=0.0, batch_norm_params=None, scope='top_logits')
+        #out = ops.fc(out, 10, activation=None, bias=0.0, batch_norm_params=None, scope='top_logits')
+        out = ops.fc(out, 10, activation=None, scope='top_logits')
 
     return out
 
@@ -53,7 +54,7 @@ def fine_layers(inputs):
 def entropy(coarse_logits):
     """Calculate the entropy of the coarse model output
     """
-    return -tf.reduce_sum(coarse_logits*tf.log(coarse_logits))
+    return -tf.reduce_sum(coarse_logits*tf.log(tf.clip_by_value(coarse_logits,1e-10,1.0)))
 
 def identify_saliency(grads):
     """Identify top k saliency scores.
@@ -65,10 +66,35 @@ def identify_saliency(grads):
     """
 
     #M = tf.sqrt(tf.reduce_sum(tf.mul(grads,grads),3))
-    M = tf.sqrt(tf.reduce_sum(tf.square(grads),3))
+    M = tf.sqrt(tf.reduce_sum(tf.square(grads),3)+1e-8)
     top_k_values, top_k_idxs = tf.nn.top_k(ops.flatten(M), N_PATCHES)
 
     return top_k_values, top_k_idxs, M
+
+def extract_patches(inputs, size, offsets):
+
+    batch_size = inputs.get_shape()[0]
+
+    padded = tf.pad(inputs, [[0,0],[2,2],[2,2],[0,0]])
+    unpacked = tf.unpack(tf.squeeze(padded))
+
+    extra_margins = tf.constant([1,1,2,2])
+
+    sliced_list = []
+    for i in xrange(batch_size.value):
+    
+        margins = tf.random_shuffle(extra_margins)
+        margins = margins[:2]
+        start_pts = tf.sub(offsets[i,:],margins)
+        sliced = tf.slice(unpacked[i],start_pts,size)
+        sliced_list.append(sliced)
+
+    patches = tf.pack(sliced_list)
+    patches = tf.expand_dims(patches,3)
+
+    return patches
+
+    
 
 def extract_features(inputs, k_idxs, map_h):
     """Extract top k fine features
@@ -87,15 +113,20 @@ def extract_features(inputs, k_idxs, map_h):
         # NOTE: 
         # calculate the center of input batches
         # this depends on coarse layer's architecture
-        origin_i = 2*(2*idx_i+1)+3
-        origin_j = 2*(2*idx_j+1)+3
+        #origin_i = 2*(2*idx_i+1)+3
+        #origin_j = 2*(2*idx_j+1)+3
+
+        # NOTE: the below origins are starting points, not center!
+        origin_i = 2*(2*idx_i+1)+3 - 5 + 2
+        origin_j = 2*(2*idx_j+1)+3 - 5 + 2
 
         origin_centers = tf.concat(1,[origin_i,origin_j])
-        origin_centers = tf.to_float(origin_centers)
+        #origin_centers = tf.to_float(origin_centers)
 
         # NOTE: size also depends on the architecture
-        patches = tf.image.extract_glimpse(inputs, size=[14,14], offsets=origin_centers, 
-                                           centered=False, normalized=False)
+        #patches = tf.image.extract_glimpse(inputs, size=[14,14], offsets=origin_centers, 
+        #                                   centered=False, normalized=False)
+        patches = extract_patches(inputs, size=[14,14], offsets=origin_centers)
 
         fine_features = fine_layers(patches)
 
@@ -180,7 +211,7 @@ def inference(inputs, is_training=True, scope=''):
 
     batch_norm_params = {'decay': 0.9, 'epsilon': 0.001}
 
-    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.001,
+    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.0001,
                           is_training=is_training, batch_norm_params=batch_norm_params):
         # get features from coarse layers
         coarse_features = coarse_layers(inputs)

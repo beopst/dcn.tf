@@ -14,7 +14,7 @@ import numpy as np
 import time
 
 from slim import slim
-from models import only_coarse as model
+from models import dcn as model
 import mnist_input
 from random import shuffle
 
@@ -24,7 +24,7 @@ NUM_EPOCHS = 50
 NUM_EPOCHS_PER_DECAY = 20
 INITIAL_LEARNING_RATE = 0.001
 LEARNING_RATE_DECAY = 0.1
-HINT_WEIGHT = 0.01
+HINT_WEIGHT = 0.0
 ######################################################
 
 
@@ -36,10 +36,10 @@ def error_rate(predictions, labels):
 def train():
 
 
-    trn_data = mnist_input.load_data('../dcn.tf/data/mnist-cluttered/train')
+    trn_data = mnist_input.load_data('data/mnist-cluttered/train')
     n_trn = len(trn_data)
 
-    val_data = mnist_input.load_data('../dcn.tf/data/mnist-cluttered/valid', shuffle=False)
+    val_data = mnist_input.load_data('data/mnist-cluttered/valid', shuffle=False)
     val_data_x, val_data_y = zip(*val_data)
     n_val = len(val_data)
 
@@ -47,7 +47,7 @@ def train():
     num_batches_for_epoch = int(np.ceil(n_trn/BATCH_SIZE))
     decay_steps = int(num_batches_for_epoch * NUM_EPOCHS_PER_DECAY)
 
-    with tf.device('/gpu:1'):
+    with tf.device('/gpu:0'):
 
         trn_x = tf.placeholder(tf.float32, shape=(BATCH_SIZE, 100, 100, 1))
         trn_y = tf.placeholder(tf.int32, shape=(BATCH_SIZE,))
@@ -71,8 +71,8 @@ def train():
         optimizer = tf.train.AdamOptimizer(lr)
 
         top_vars = slim.variables.get_variables('top_layers')
-        #fine_vars = slim.variables.get_variables('fine_layers')
-        fine_vars = []
+        fine_vars = slim.variables.get_variables('fine_layers')
+        #fine_vars = []
         coarse_vars = slim.variables.get_variables('coarse_layers')
         #coarse_vars = []
 

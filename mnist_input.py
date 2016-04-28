@@ -17,7 +17,7 @@ def load_data(src,shuffle=True):
 
     for idx, img in enumerate(imgs):
         im = io.imread(img,1)
-        im = img_as_float(im) - 0.5 # rescale from [0,255] to [-0.5,0.5]
+        im = img_as_float(im) # rescale from [0,255] to [-0.5,0.5]
 
         label = int(img.split('/')[-1].split('.')[0].split('_')[-1])
         

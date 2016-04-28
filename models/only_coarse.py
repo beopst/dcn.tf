@@ -15,7 +15,8 @@ def top_layers(inputs):
         out = ops.max_pool(out, [fm_size,fm_size], stride=1, scope='top_gpool')
 
         out = ops.flatten(out, scope='top_flatten')
-        out = ops.fc(out, 10, activation=None, bias=0.0, batch_norm_params=None, scope='top_logits')
+        #out = ops.fc(out, 10, activation=None, bias=0.0, batch_norm_params=None, scope='top_logits')
+        out = ops.fc(out, 10, activation=None, scope='top_logits')
 
     return out
 
@@ -34,7 +35,7 @@ def inference(inputs, is_training=True, scope=''):
 
     batch_norm_params = {'decay': 0.9, 'epsilon': 0.001}
 
-    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.001,
+    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.0001,
                           is_training=is_training, batch_norm_params=batch_norm_params):
         
         coarse_features = coarse_layers(inputs)
