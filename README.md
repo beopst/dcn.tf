@@ -1,480 +1,478 @@
 # Dynamic Capacity Networks using Tensorflow
 
-Dynamic Capacity Networks (DCN; http://arxiv.org/abs/1511.07838) implementation using Tensorflow. DCN reduces the number of computations by applying high-capacity networks to some selected input patches. 
+Dynamic Capacity Networks (DCN; http://arxiv.org/abs/1511.07838) implementation using Tensorflow. DCN reduces the number of computations by applying high-capacity networks to only some selected input patches. 
 
 ## Dataset
 
 * [Cluttered MNIST](https://github.com/deepmind/mnist-cluttered)
 
-## NOTES
+## Results
 
-* It is observed that DCN outperforms Coarse Model. However, it is still worse than Fine Model regardless of using hint objective. Hint objective gives us slightly (or insignificant) better generalization.
+| Models | Validation accuracy |
+|:------:|:-------------------:|
+| Coarse Model | 2.492 |
+| Fine Model | 1.070 |
+| DCN without hint | 1.438 |
+| DCN with hint | 1.197 |
 
-* In this benchmark, batch normalization was applied to only convolution layers. Weight decay parameter was set to 0.001, and additional weight parameter for hint objective was set to 0.01.
+Validation accuracy scores are averaged over the last 10 epochs.
 
-* Adam optimizer was used. Initial learning rate was 0.001, and it was decreased a factor of 10 for every 20 epochs. Total number of epochs was 50. 
+## Notes
+
+* It is observed that DCN outperforms Coarse Model. However, it is still worse than Fine Model regardless of using hint objective. It is verified that hint objective gives better generalization.
+
+* In this benchmark, weight decay parameter was set to 0.0005, and additional weight parameter for hint objective was set to 0.01.
+
+* Adam optimizer was used. Initial learning rate was 0.001, and it was decreased a factor of 10 for every 100 epochs. Total number of epochs was 300. 
 
 * Computation time issue
->Although DCN can greatly reduce the number of computations, it may consume more computation time since it requires sequantial processes (extract input patches of interest, and then feed them into high-capacity networks). Computation time can be reduced if the input patches are concatenated for convolution.
+  
+  In this implementation, computation time for DCN is slightly lower than that of Fine Model.
+   
 
 ## Logs
 * Coarse Model
 ```
-[Validation] Epoch: 40.00, Elapsed: 695.5 ms, Error: 2.45
+Step 226800 (epoch 290.03), Elapsed: 2358.3 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 226900 (epoch 290.15), Elapsed: 2342.8 ms, LR: 0.0000, Loss: 0.0079 Hint loss: 0.0000
+Step 227000 (epoch 290.28), Elapsed: 2352.9 ms, LR: 0.0000, Loss: 0.0083 Hint loss: 0.0000
+Step 227100 (epoch 290.41), Elapsed: 2345.2 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 227200 (epoch 290.54), Elapsed: 2343.2 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 227300 (epoch 290.66), Elapsed: 2357.4 ms, LR: 0.0000, Loss: 0.0148 Hint loss: 0.0000
+Step 227400 (epoch 290.79), Elapsed: 2361.9 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 227500 (epoch 290.92), Elapsed: 2346.6 ms, LR: 0.0000, Loss: 0.0093 Hint loss: 0.0000
 
-Step 31300 (epoch 40.03), Elapsed: 2390.5 ms, LR: 0.0000, Loss: 0.0208 Hint loss: 0.0000
-Step 31400 (epoch 40.15), Elapsed: 2370.4 ms, LR: 0.0000, Loss: 0.0214 Hint loss: 0.0000
-Step 31500 (epoch 40.28), Elapsed: 2374.6 ms, LR: 0.0000, Loss: 0.0225 Hint loss: 0.0000
-Step 31600 (epoch 40.41), Elapsed: 2373.3 ms, LR: 0.0000, Loss: 0.0207 Hint loss: 0.0000
-Step 31700 (epoch 40.54), Elapsed: 2380.1 ms, LR: 0.0000, Loss: 0.0202 Hint loss: 0.0000
-Step 31800 (epoch 40.66), Elapsed: 2376.3 ms, LR: 0.0000, Loss: 0.0229 Hint loss: 0.0000
-Step 31900 (epoch 40.79), Elapsed: 2379.9 ms, LR: 0.0000, Loss: 0.0200 Hint loss: 0.0000
-Step 32000 (epoch 40.92), Elapsed: 2376.8 ms, LR: 0.0000, Loss: 0.0232 Hint loss: 0.0000
+[Validation] Epoch: 291.00, Elapsed: 696.8 ms, Error: 2.45
 
-[Validation] Epoch: 41.00, Elapsed: 685.5 ms, Error: 2.40
+Step 227600 (epoch 291.05), Elapsed: 2341.3 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 227700 (epoch 291.18), Elapsed: 2341.7 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 227800 (epoch 291.30), Elapsed: 2357.9 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 227900 (epoch 291.43), Elapsed: 2338.8 ms, LR: 0.0000, Loss: 0.0078 Hint loss: 0.0000
+Step 228000 (epoch 291.56), Elapsed: 2349.2 ms, LR: 0.0000, Loss: 0.0079 Hint loss: 0.0000
+Step 228100 (epoch 291.69), Elapsed: 2366.5 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 228200 (epoch 291.82), Elapsed: 2367.5 ms, LR: 0.0000, Loss: 0.0079 Hint loss: 0.0000
+Step 228300 (epoch 291.94), Elapsed: 2431.5 ms, LR: 0.0000, Loss: 0.0081 Hint loss: 0.0000
 
-Step 32100 (epoch 41.05), Elapsed: 2387.3 ms, LR: 0.0000, Loss: 0.0209 Hint loss: 0.0000
-Step 32200 (epoch 41.18), Elapsed: 2373.0 ms, LR: 0.0000, Loss: 0.0205 Hint loss: 0.0000
-Step 32300 (epoch 41.30), Elapsed: 2378.5 ms, LR: 0.0000, Loss: 0.0201 Hint loss: 0.0000
-Step 32400 (epoch 41.43), Elapsed: 2383.1 ms, LR: 0.0000, Loss: 0.0206 Hint loss: 0.0000
-Step 32500 (epoch 41.56), Elapsed: 2381.1 ms, LR: 0.0000, Loss: 0.0219 Hint loss: 0.0000
-Step 32600 (epoch 41.69), Elapsed: 2383.1 ms, LR: 0.0000, Loss: 0.0211 Hint loss: 0.0000
-Step 32700 (epoch 41.82), Elapsed: 2404.9 ms, LR: 0.0000, Loss: 0.0210 Hint loss: 0.0000
-Step 32800 (epoch 41.94), Elapsed: 2400.4 ms, LR: 0.0000, Loss: 0.0216 Hint loss: 0.0000
+[Validation] Epoch: 292.00, Elapsed: 694.0 ms, Error: 2.53
 
-[Validation] Epoch: 42.00, Elapsed: 697.1 ms, Error: 2.39
+Step 228400 (epoch 292.07), Elapsed: 2356.8 ms, LR: 0.0000, Loss: 0.0079 Hint loss: 0.0000
+Step 228500 (epoch 292.20), Elapsed: 2349.3 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 228600 (epoch 292.33), Elapsed: 2358.9 ms, LR: 0.0000, Loss: 0.0078 Hint loss: 0.0000
+Step 228700 (epoch 292.46), Elapsed: 2335.6 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 228800 (epoch 292.58), Elapsed: 2358.8 ms, LR: 0.0000, Loss: 0.0085 Hint loss: 0.0000
+Step 228900 (epoch 292.71), Elapsed: 2360.5 ms, LR: 0.0000, Loss: 0.0085 Hint loss: 0.0000
+Step 229000 (epoch 292.84), Elapsed: 2359.6 ms, LR: 0.0000, Loss: 0.0088 Hint loss: 0.0000
+Step 229100 (epoch 292.97), Elapsed: 2337.0 ms, LR: 0.0000, Loss: 0.0083 Hint loss: 0.0000
 
-Step 32900 (epoch 42.07), Elapsed: 2382.6 ms, LR: 0.0000, Loss: 0.0209 Hint loss: 0.0000
-Step 33000 (epoch 42.20), Elapsed: 2364.3 ms, LR: 0.0000, Loss: 0.0200 Hint loss: 0.0000
-Step 33100 (epoch 42.33), Elapsed: 2373.7 ms, LR: 0.0000, Loss: 0.0202 Hint loss: 0.0000
-Step 33200 (epoch 42.46), Elapsed: 2373.6 ms, LR: 0.0000, Loss: 0.0205 Hint loss: 0.0000
-Step 33300 (epoch 42.58), Elapsed: 2381.7 ms, LR: 0.0000, Loss: 0.0203 Hint loss: 0.0000
-Step 33400 (epoch 42.71), Elapsed: 2380.1 ms, LR: 0.0000, Loss: 0.0200 Hint loss: 0.0000
-Step 33500 (epoch 42.84), Elapsed: 2371.7 ms, LR: 0.0000, Loss: 0.0200 Hint loss: 0.0000
-Step 33600 (epoch 42.97), Elapsed: 2392.8 ms, LR: 0.0000, Loss: 0.0224 Hint loss: 0.0000
+[Validation] Epoch: 293.00, Elapsed: 688.8 ms, Error: 2.52
 
-[Validation] Epoch: 43.00, Elapsed: 684.8 ms, Error: 2.31
+Step 229200 (epoch 293.09), Elapsed: 2351.8 ms, LR: 0.0000, Loss: 0.0081 Hint loss: 0.0000
+Step 229300 (epoch 293.22), Elapsed: 2360.4 ms, LR: 0.0000, Loss: 0.0081 Hint loss: 0.0000
+Step 229400 (epoch 293.35), Elapsed: 2345.0 ms, LR: 0.0000, Loss: 0.0078 Hint loss: 0.0000
+Step 229500 (epoch 293.48), Elapsed: 2343.5 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 229600 (epoch 293.61), Elapsed: 2359.6 ms, LR: 0.0000, Loss: 0.0082 Hint loss: 0.0000
+Step 229700 (epoch 293.73), Elapsed: 2367.9 ms, LR: 0.0000, Loss: 0.0081 Hint loss: 0.0000
+Step 229800 (epoch 293.86), Elapsed: 2362.6 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 229900 (epoch 293.99), Elapsed: 2351.2 ms, LR: 0.0000, Loss: 0.0084 Hint loss: 0.0000
 
-Step 33700 (epoch 43.09), Elapsed: 2384.4 ms, LR: 0.0000, Loss: 0.0207 Hint loss: 0.0000
-Step 33800 (epoch 43.22), Elapsed: 2371.1 ms, LR: 0.0000, Loss: 0.0207 Hint loss: 0.0000
-Step 33900 (epoch 43.35), Elapsed: 2374.6 ms, LR: 0.0000, Loss: 0.0201 Hint loss: 0.0000
-Step 34000 (epoch 43.48), Elapsed: 2377.6 ms, LR: 0.0000, Loss: 0.0198 Hint loss: 0.0000
-Step 34100 (epoch 43.61), Elapsed: 2377.1 ms, LR: 0.0000, Loss: 0.0220 Hint loss: 0.0000
-Step 34200 (epoch 43.73), Elapsed: 2381.6 ms, LR: 0.0000, Loss: 0.0203 Hint loss: 0.0000
-Step 34300 (epoch 43.86), Elapsed: 2390.3 ms, LR: 0.0000, Loss: 0.0209 Hint loss: 0.0000
-Step 34400 (epoch 43.99), Elapsed: 2403.7 ms, LR: 0.0000, Loss: 0.0199 Hint loss: 0.0000
+[Validation] Epoch: 294.00, Elapsed: 703.0 ms, Error: 2.45
 
-[Validation] Epoch: 44.00, Elapsed: 691.8 ms, Error: 2.30
+Step 230000 (epoch 294.12), Elapsed: 2355.6 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 230100 (epoch 294.25), Elapsed: 2349.7 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 230200 (epoch 294.37), Elapsed: 2355.4 ms, LR: 0.0000, Loss: 0.0087 Hint loss: 0.0000
+Step 230300 (epoch 294.50), Elapsed: 2349.3 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 230400 (epoch 294.63), Elapsed: 2347.4 ms, LR: 0.0000, Loss: 0.0078 Hint loss: 0.0000
+Step 230500 (epoch 294.76), Elapsed: 2344.4 ms, LR: 0.0000, Loss: 0.0087 Hint loss: 0.0000
+Step 230600 (epoch 294.88), Elapsed: 2348.7 ms, LR: 0.0000, Loss: 0.0081 Hint loss: 0.0000
 
-Step 34500 (epoch 44.12), Elapsed: 2394.6 ms, LR: 0.0000, Loss: 0.0196 Hint loss: 0.0000
-Step 34600 (epoch 44.25), Elapsed: 2379.5 ms, LR: 0.0000, Loss: 0.0204 Hint loss: 0.0000
-Step 34700 (epoch 44.37), Elapsed: 2385.3 ms, LR: 0.0000, Loss: 0.0199 Hint loss: 0.0000
-Step 34800 (epoch 44.50), Elapsed: 2375.8 ms, LR: 0.0000, Loss: 0.0197 Hint loss: 0.0000
-Step 34900 (epoch 44.63), Elapsed: 2375.5 ms, LR: 0.0000, Loss: 0.0196 Hint loss: 0.0000
-Step 35000 (epoch 44.76), Elapsed: 2375.6 ms, LR: 0.0000, Loss: 0.0201 Hint loss: 0.0000
-Step 35100 (epoch 44.88), Elapsed: 2383.3 ms, LR: 0.0000, Loss: 0.0213 Hint loss: 0.0000
+[Validation] Epoch: 295.00, Elapsed: 689.6 ms, Error: 2.49
 
-[Validation] Epoch: 45.00, Elapsed: 686.0 ms, Error: 2.36
+Step 230700 (epoch 295.01), Elapsed: 2351.1 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 230800 (epoch 295.14), Elapsed: 2350.2 ms, LR: 0.0000, Loss: 0.0081 Hint loss: 0.0000
+Step 230900 (epoch 295.27), Elapsed: 2340.4 ms, LR: 0.0000, Loss: 0.0089 Hint loss: 0.0000
+Step 231000 (epoch 295.40), Elapsed: 2353.8 ms, LR: 0.0000, Loss: 0.0079 Hint loss: 0.0000
+Step 231100 (epoch 295.52), Elapsed: 2357.5 ms, LR: 0.0000, Loss: 0.0081 Hint loss: 0.0000
+Step 231200 (epoch 295.65), Elapsed: 2371.2 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 231300 (epoch 295.78), Elapsed: 2423.6 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 231400 (epoch 295.91), Elapsed: 2348.8 ms, LR: 0.0000, Loss: 0.0079 Hint loss: 0.0000
 
-Step 35200 (epoch 45.01), Elapsed: 2381.1 ms, LR: 0.0000, Loss: 0.0199 Hint loss: 0.0000
-Step 35300 (epoch 45.14), Elapsed: 2367.0 ms, LR: 0.0000, Loss: 0.0219 Hint loss: 0.0000
-Step 35400 (epoch 45.27), Elapsed: 2365.4 ms, LR: 0.0000, Loss: 0.0201 Hint loss: 0.0000
-Step 35500 (epoch 45.40), Elapsed: 2373.8 ms, LR: 0.0000, Loss: 0.0196 Hint loss: 0.0000
-Step 35600 (epoch 45.52), Elapsed: 2373.4 ms, LR: 0.0000, Loss: 0.0202 Hint loss: 0.0000
-Step 35700 (epoch 45.65), Elapsed: 2404.5 ms, LR: 0.0000, Loss: 0.0214 Hint loss: 0.0000
-Step 35800 (epoch 45.78), Elapsed: 2399.5 ms, LR: 0.0000, Loss: 0.0202 Hint loss: 0.0000
-Step 35900 (epoch 45.91), Elapsed: 2402.0 ms, LR: 0.0000, Loss: 0.0194 Hint loss: 0.0000
+[Validation] Epoch: 296.00, Elapsed: 699.8 ms, Error: 2.47
 
-[Validation] Epoch: 46.00, Elapsed: 709.7 ms, Error: 2.35
+Step 231500 (epoch 296.04), Elapsed: 2337.9 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 231600 (epoch 296.16), Elapsed: 2362.0 ms, LR: 0.0000, Loss: 0.0079 Hint loss: 0.0000
+Step 231700 (epoch 296.29), Elapsed: 2349.2 ms, LR: 0.0000, Loss: 0.0096 Hint loss: 0.0000
+Step 231800 (epoch 296.42), Elapsed: 2357.2 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 231900 (epoch 296.55), Elapsed: 2353.0 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 232000 (epoch 296.68), Elapsed: 2358.1 ms, LR: 0.0000, Loss: 0.0085 Hint loss: 0.0000
+Step 232100 (epoch 296.80), Elapsed: 2349.0 ms, LR: 0.0000, Loss: 0.0081 Hint loss: 0.0000
+Step 232200 (epoch 296.93), Elapsed: 2347.6 ms, LR: 0.0000, Loss: 0.0075 Hint loss: 0.0000
 
-Step 36000 (epoch 46.04), Elapsed: 2390.5 ms, LR: 0.0000, Loss: 0.0196 Hint loss: 0.0000
-Step 36100 (epoch 46.16), Elapsed: 2370.9 ms, LR: 0.0000, Loss: 0.0199 Hint loss: 0.0000
-Step 36200 (epoch 46.29), Elapsed: 2375.7 ms, LR: 0.0000, Loss: 0.0200 Hint loss: 0.0000
-Step 36300 (epoch 46.42), Elapsed: 2356.7 ms, LR: 0.0000, Loss: 0.0191 Hint loss: 0.0000
-Step 36400 (epoch 46.55), Elapsed: 2361.4 ms, LR: 0.0000, Loss: 0.0196 Hint loss: 0.0000
-Step 36500 (epoch 46.68), Elapsed: 2369.0 ms, LR: 0.0000, Loss: 0.0192 Hint loss: 0.0000
-Step 36600 (epoch 46.80), Elapsed: 2368.6 ms, LR: 0.0000, Loss: 0.0199 Hint loss: 0.0000
-Step 36700 (epoch 46.93), Elapsed: 2382.7 ms, LR: 0.0000, Loss: 0.0194 Hint loss: 0.0000
+[Validation] Epoch: 297.00, Elapsed: 701.5 ms, Error: 2.54
 
-[Validation] Epoch: 47.00, Elapsed: 700.7 ms, Error: 2.34
+Step 232300 (epoch 297.06), Elapsed: 2351.3 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 232400 (epoch 297.19), Elapsed: 2357.8 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 232500 (epoch 297.31), Elapsed: 2336.1 ms, LR: 0.0000, Loss: 0.0075 Hint loss: 0.0000
+Step 232600 (epoch 297.44), Elapsed: 2342.6 ms, LR: 0.0000, Loss: 0.0078 Hint loss: 0.0000
+Step 232700 (epoch 297.57), Elapsed: 2361.8 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 232800 (epoch 297.70), Elapsed: 2383.1 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 232900 (epoch 297.83), Elapsed: 2355.7 ms, LR: 0.0000, Loss: 0.0075 Hint loss: 0.0000
+Step 233000 (epoch 297.95), Elapsed: 2358.5 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
 
-Step 36800 (epoch 47.06), Elapsed: 2382.1 ms, LR: 0.0000, Loss: 0.0192 Hint loss: 0.0000
-Step 36900 (epoch 47.19), Elapsed: 2377.8 ms, LR: 0.0000, Loss: 0.0196 Hint loss: 0.0000
-Step 37000 (epoch 47.31), Elapsed: 2369.6 ms, LR: 0.0000, Loss: 0.0204 Hint loss: 0.0000
-Step 37100 (epoch 47.44), Elapsed: 2381.0 ms, LR: 0.0000, Loss: 0.0189 Hint loss: 0.0000
-Step 37200 (epoch 47.57), Elapsed: 2380.8 ms, LR: 0.0000, Loss: 0.0192 Hint loss: 0.0000
-Step 37300 (epoch 47.70), Elapsed: 2375.5 ms, LR: 0.0000, Loss: 0.0201 Hint loss: 0.0000
-Step 37400 (epoch 47.83), Elapsed: 2379.6 ms, LR: 0.0000, Loss: 0.0193 Hint loss: 0.0000
-Step 37500 (epoch 47.95), Elapsed: 2376.7 ms, LR: 0.0000, Loss: 0.0188 Hint loss: 0.0000
+[Validation] Epoch: 298.00, Elapsed: 720.4 ms, Error: 2.46
 
-[Validation] Epoch: 48.00, Elapsed: 682.2 ms, Error: 2.34
+Step 233100 (epoch 298.08), Elapsed: 2359.4 ms, LR: 0.0000, Loss: 0.0081 Hint loss: 0.0000
+Step 233200 (epoch 298.21), Elapsed: 2358.7 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 233300 (epoch 298.34), Elapsed: 2361.6 ms, LR: 0.0000, Loss: 0.0088 Hint loss: 0.0000
+Step 233400 (epoch 298.47), Elapsed: 2349.3 ms, LR: 0.0000, Loss: 0.0084 Hint loss: 0.0000
+Step 233500 (epoch 298.59), Elapsed: 2351.1 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 233600 (epoch 298.72), Elapsed: 2348.3 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 233700 (epoch 298.85), Elapsed: 2336.4 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 233800 (epoch 298.98), Elapsed: 2333.8 ms, LR: 0.0000, Loss: 0.0075 Hint loss: 0.0000
 
-Step 37600 (epoch 48.08), Elapsed: 2379.7 ms, LR: 0.0000, Loss: 0.0197 Hint loss: 0.0000
-Step 37700 (epoch 48.21), Elapsed: 2379.8 ms, LR: 0.0000, Loss: 0.0192 Hint loss: 0.0000
-Step 37800 (epoch 48.34), Elapsed: 2377.5 ms, LR: 0.0000, Loss: 0.0192 Hint loss: 0.0000
-Step 37900 (epoch 48.47), Elapsed: 2388.0 ms, LR: 0.0000, Loss: 0.0202 Hint loss: 0.0000
-Step 38000 (epoch 48.59), Elapsed: 2385.4 ms, LR: 0.0000, Loss: 0.0194 Hint loss: 0.0000
-Step 38100 (epoch 48.72), Elapsed: 2388.1 ms, LR: 0.0000, Loss: 0.0195 Hint loss: 0.0000
-Step 38200 (epoch 48.85), Elapsed: 2373.1 ms, LR: 0.0000, Loss: 0.0189 Hint loss: 0.0000
-Step 38300 (epoch 48.98), Elapsed: 2348.6 ms, LR: 0.0000, Loss: 0.0184 Hint loss: 0.0000
+[Validation] Epoch: 299.00, Elapsed: 695.9 ms, Error: 2.51
 
-[Validation] Epoch: 49.00, Elapsed: 647.7 ms, Error: 2.39
+Step 233900 (epoch 299.10), Elapsed: 2347.8 ms, LR: 0.0000, Loss: 0.0076 Hint loss: 0.0000
+Step 234000 (epoch 299.23), Elapsed: 2341.9 ms, LR: 0.0000, Loss: 0.0079 Hint loss: 0.0000
+Step 234100 (epoch 299.36), Elapsed: 2370.6 ms, LR: 0.0000, Loss: 0.0082 Hint loss: 0.0000
+Step 234200 (epoch 299.49), Elapsed: 2388.1 ms, LR: 0.0000, Loss: 0.0075 Hint loss: 0.0000
+Step 234300 (epoch 299.62), Elapsed: 2421.0 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
+Step 234400 (epoch 299.74), Elapsed: 2344.7 ms, LR: 0.0000, Loss: 0.0074 Hint loss: 0.0000
+Step 234500 (epoch 299.87), Elapsed: 2358.0 ms, LR: 0.0000, Loss: 0.0077 Hint loss: 0.0000
 
-Step 38400 (epoch 49.10), Elapsed: 2343.7 ms, LR: 0.0000, Loss: 0.0189 Hint loss: 0.0000
-Step 38500 (epoch 49.23), Elapsed: 2343.3 ms, LR: 0.0000, Loss: 0.0200 Hint loss: 0.0000
-Step 38600 (epoch 49.36), Elapsed: 2348.3 ms, LR: 0.0000, Loss: 0.0195 Hint loss: 0.0000
-Step 38700 (epoch 49.49), Elapsed: 2367.9 ms, LR: 0.0000, Loss: 0.0194 Hint loss: 0.0000
-Step 38800 (epoch 49.62), Elapsed: 2373.8 ms, LR: 0.0000, Loss: 0.0193 Hint loss: 0.0000
-Step 38900 (epoch 49.74), Elapsed: 2372.7 ms, LR: 0.0000, Loss: 0.0199 Hint loss: 0.0000
-Step 39000 (epoch 49.87), Elapsed: 2371.0 ms, LR: 0.0000, Loss: 0.0191 Hint loss: 0.0000
-
-[Validation] Epoch: 50.00, Elapsed: 647.4 ms, Error: 2.32
-
-Step 39100 (epoch 50.00), Elapsed: 2376.8 ms, LR: 0.0000, Loss: 0.0186 Hint loss: 0.0000
+[Validation] Epoch: 300.00, Elapsed: 705.3 ms, Error: 2.50
 ```
 
 * Fine Model
 ```
-[Validation] Epoch: 40.00, Elapsed: 2667.5 ms, Error: 1.24
+Step 226800 (epoch 290.03), Elapsed: 9231.3 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 226900 (epoch 290.15), Elapsed: 9246.0 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 227000 (epoch 290.28), Elapsed: 9243.2 ms, LR: 0.0000, Loss: 0.0042 Hint loss: 0.0000
+Step 227100 (epoch 290.41), Elapsed: 9244.7 ms, LR: 0.0000, Loss: 0.0042 Hint loss: 0.0000
+Step 227200 (epoch 290.54), Elapsed: 9242.7 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 227300 (epoch 290.66), Elapsed: 9249.4 ms, LR: 0.0000, Loss: 0.0042 Hint loss: 0.0000
+Step 227400 (epoch 290.79), Elapsed: 9236.7 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 227500 (epoch 290.92), Elapsed: 9244.7 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
 
-Step 31300 (epoch 40.03), Elapsed: 8900.9 ms, LR: 0.0000, Loss: 0.0191 Hint loss: 0.0000
-Step 31400 (epoch 40.15), Elapsed: 8892.3 ms, LR: 0.0000, Loss: 0.0191 Hint loss: 0.0000
-Step 31500 (epoch 40.28), Elapsed: 8904.2 ms, LR: 0.0000, Loss: 0.0186 Hint loss: 0.0000
-Step 31600 (epoch 40.41), Elapsed: 8893.0 ms, LR: 0.0000, Loss: 0.0191 Hint loss: 0.0000
-Step 31700 (epoch 40.54), Elapsed: 8892.1 ms, LR: 0.0000, Loss: 0.0186 Hint loss: 0.0000
-Step 31800 (epoch 40.66), Elapsed: 8899.7 ms, LR: 0.0000, Loss: 0.0189 Hint loss: 0.0000
-Step 31900 (epoch 40.79), Elapsed: 8895.4 ms, LR: 0.0000, Loss: 0.0188 Hint loss: 0.0000
-Step 32000 (epoch 40.92), Elapsed: 8898.6 ms, LR: 0.0000, Loss: 0.0195 Hint loss: 0.0000
+[Validation] Epoch: 291.00, Elapsed: 4519.1 ms, Error: 1.05
 
-[Validation] Epoch: 41.00, Elapsed: 2675.6 ms, Error: 1.17
+Step 227600 (epoch 291.05), Elapsed: 9245.0 ms, LR: 0.0000, Loss: 0.0042 Hint loss: 0.0000
+Step 227700 (epoch 291.18), Elapsed: 9262.2 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 227800 (epoch 291.30), Elapsed: 9226.3 ms, LR: 0.0000, Loss: 0.0042 Hint loss: 0.0000
+Step 227900 (epoch 291.43), Elapsed: 9240.6 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 228000 (epoch 291.56), Elapsed: 9252.9 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 228100 (epoch 291.69), Elapsed: 9237.1 ms, LR: 0.0000, Loss: 0.0042 Hint loss: 0.0000
+Step 228200 (epoch 291.82), Elapsed: 9258.1 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 228300 (epoch 291.94), Elapsed: 9220.3 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
 
-Step 32100 (epoch 41.05), Elapsed: 8900.6 ms, LR: 0.0000, Loss: 0.0188 Hint loss: 0.0000
-Step 32200 (epoch 41.18), Elapsed: 8891.0 ms, LR: 0.0000, Loss: 0.0187 Hint loss: 0.0000
-Step 32300 (epoch 41.30), Elapsed: 8887.3 ms, LR: 0.0000, Loss: 0.0186 Hint loss: 0.0000
-Step 32400 (epoch 41.43), Elapsed: 8884.8 ms, LR: 0.0000, Loss: 0.0185 Hint loss: 0.0000
-Step 32500 (epoch 41.56), Elapsed: 8891.0 ms, LR: 0.0000, Loss: 0.0185 Hint loss: 0.0000
-Step 32600 (epoch 41.69), Elapsed: 8899.9 ms, LR: 0.0000, Loss: 0.0187 Hint loss: 0.0000
-Step 32700 (epoch 41.82), Elapsed: 8898.7 ms, LR: 0.0000, Loss: 0.0189 Hint loss: 0.0000
-Step 32800 (epoch 41.94), Elapsed: 8895.0 ms, LR: 0.0000, Loss: 0.0185 Hint loss: 0.0000
+[Validation] Epoch: 292.00, Elapsed: 5068.6 ms, Error: 1.10
 
-[Validation] Epoch: 42.00, Elapsed: 2679.9 ms, Error: 1.20
+Step 228400 (epoch 292.07), Elapsed: 9243.4 ms, LR: 0.0000, Loss: 0.0042 Hint loss: 0.0000
+Step 228500 (epoch 292.20), Elapsed: 9264.5 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 228600 (epoch 292.33), Elapsed: 9246.8 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 228700 (epoch 292.46), Elapsed: 9236.6 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 228800 (epoch 292.58), Elapsed: 9254.9 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 228900 (epoch 292.71), Elapsed: 9217.9 ms, LR: 0.0000, Loss: 0.0054 Hint loss: 0.0000
+Step 229000 (epoch 292.84), Elapsed: 9242.8 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 229100 (epoch 292.97), Elapsed: 9263.0 ms, LR: 0.0000, Loss: 0.0043 Hint loss: 0.0000
 
-Step 32900 (epoch 42.07), Elapsed: 8899.9 ms, LR: 0.0000, Loss: 0.0189 Hint loss: 0.0000
-Step 33000 (epoch 42.20), Elapsed: 8888.5 ms, LR: 0.0000, Loss: 0.0193 Hint loss: 0.0000
-Step 33100 (epoch 42.33), Elapsed: 8894.6 ms, LR: 0.0000, Loss: 0.0186 Hint loss: 0.0000
-Step 33200 (epoch 42.46), Elapsed: 8888.2 ms, LR: 0.0000, Loss: 0.0188 Hint loss: 0.0000
-Step 33300 (epoch 42.58), Elapsed: 8891.2 ms, LR: 0.0000, Loss: 0.0186 Hint loss: 0.0000
-Step 33400 (epoch 42.71), Elapsed: 8892.3 ms, LR: 0.0000, Loss: 0.0194 Hint loss: 0.0000
-Step 33500 (epoch 42.84), Elapsed: 8893.0 ms, LR: 0.0000, Loss: 0.0190 Hint loss: 0.0000
-Step 33600 (epoch 42.97), Elapsed: 8904.3 ms, LR: 0.0000, Loss: 0.0183 Hint loss: 0.0000
+[Validation] Epoch: 293.00, Elapsed: 5087.3 ms, Error: 1.10
 
-[Validation] Epoch: 43.00, Elapsed: 2672.3 ms, Error: 1.18
+Step 229200 (epoch 293.09), Elapsed: 9226.1 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 229300 (epoch 293.22), Elapsed: 9243.0 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 229400 (epoch 293.35), Elapsed: 9259.9 ms, LR: 0.0000, Loss: 0.0043 Hint loss: 0.0000
+Step 229500 (epoch 293.48), Elapsed: 9234.5 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 229600 (epoch 293.61), Elapsed: 9268.0 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 229700 (epoch 293.73), Elapsed: 9247.7 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 229800 (epoch 293.86), Elapsed: 9233.1 ms, LR: 0.0000, Loss: 0.0044 Hint loss: 0.0000
+Step 229900 (epoch 293.99), Elapsed: 9255.3 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
 
-Step 33700 (epoch 43.09), Elapsed: 8900.8 ms, LR: 0.0000, Loss: 0.0197 Hint loss: 0.0000
-Step 33800 (epoch 43.22), Elapsed: 8894.1 ms, LR: 0.0000, Loss: 0.0193 Hint loss: 0.0000
-Step 33900 (epoch 43.35), Elapsed: 8893.8 ms, LR: 0.0000, Loss: 0.0188 Hint loss: 0.0000
-Step 34000 (epoch 43.48), Elapsed: 8893.8 ms, LR: 0.0000, Loss: 0.0182 Hint loss: 0.0000
-Step 34100 (epoch 43.61), Elapsed: 8893.1 ms, LR: 0.0000, Loss: 0.0184 Hint loss: 0.0000
-Step 34200 (epoch 43.73), Elapsed: 8897.0 ms, LR: 0.0000, Loss: 0.0181 Hint loss: 0.0000
-Step 34300 (epoch 43.86), Elapsed: 8897.3 ms, LR: 0.0000, Loss: 0.0187 Hint loss: 0.0000
-Step 34400 (epoch 43.99), Elapsed: 8896.5 ms, LR: 0.0000, Loss: 0.0204 Hint loss: 0.0000
+[Validation] Epoch: 294.00, Elapsed: 4956.2 ms, Error: 1.05
 
-[Validation] Epoch: 44.00, Elapsed: 2678.7 ms, Error: 1.18
+Step 230000 (epoch 294.12), Elapsed: 9241.4 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 230100 (epoch 294.25), Elapsed: 9258.5 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 230200 (epoch 294.37), Elapsed: 9261.9 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 230300 (epoch 294.50), Elapsed: 9248.8 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 230400 (epoch 294.63), Elapsed: 9265.1 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 230500 (epoch 294.76), Elapsed: 9233.3 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 230600 (epoch 294.88), Elapsed: 9228.1 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
 
-Step 34500 (epoch 44.12), Elapsed: 8895.7 ms, LR: 0.0000, Loss: 0.0185 Hint loss: 0.0000
-Step 34600 (epoch 44.25), Elapsed: 8897.4 ms, LR: 0.0000, Loss: 0.0184 Hint loss: 0.0000
-Step 34700 (epoch 44.37), Elapsed: 8904.0 ms, LR: 0.0000, Loss: 0.0184 Hint loss: 0.0000
-Step 34800 (epoch 44.50), Elapsed: 8897.3 ms, LR: 0.0000, Loss: 0.0187 Hint loss: 0.0000
-Step 34900 (epoch 44.63), Elapsed: 8899.6 ms, LR: 0.0000, Loss: 0.0193 Hint loss: 0.0000
-Step 35000 (epoch 44.76), Elapsed: 8900.3 ms, LR: 0.0000, Loss: 0.0181 Hint loss: 0.0000
-Step 35100 (epoch 44.88), Elapsed: 8890.6 ms, LR: 0.0000, Loss: 0.0194 Hint loss: 0.0000
+[Validation] Epoch: 295.00, Elapsed: 4717.9 ms, Error: 1.09
 
-[Validation] Epoch: 45.00, Elapsed: 2682.0 ms, Error: 1.12
+Step 230700 (epoch 295.01), Elapsed: 9234.4 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 230800 (epoch 295.14), Elapsed: 9233.0 ms, LR: 0.0000, Loss: 0.0089 Hint loss: 0.0000
+Step 230900 (epoch 295.27), Elapsed: 9231.4 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 231000 (epoch 295.40), Elapsed: 9242.6 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 231100 (epoch 295.52), Elapsed: 9236.5 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 231200 (epoch 295.65), Elapsed: 9225.5 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 231300 (epoch 295.78), Elapsed: 9256.8 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 231400 (epoch 295.91), Elapsed: 9251.2 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
 
-Step 35200 (epoch 45.01), Elapsed: 8897.9 ms, LR: 0.0000, Loss: 0.0180 Hint loss: 0.0000
-Step 35300 (epoch 45.14), Elapsed: 8891.9 ms, LR: 0.0000, Loss: 0.0180 Hint loss: 0.0000
-Step 35400 (epoch 45.27), Elapsed: 8894.4 ms, LR: 0.0000, Loss: 0.0186 Hint loss: 0.0000
-Step 35500 (epoch 45.40), Elapsed: 8895.4 ms, LR: 0.0000, Loss: 0.0181 Hint loss: 0.0000
-Step 35600 (epoch 45.52), Elapsed: 8895.9 ms, LR: 0.0000, Loss: 0.0180 Hint loss: 0.0000
-Step 35700 (epoch 45.65), Elapsed: 8888.6 ms, LR: 0.0000, Loss: 0.0177 Hint loss: 0.0000
-Step 35800 (epoch 45.78), Elapsed: 8895.7 ms, LR: 0.0000, Loss: 0.0194 Hint loss: 0.0000
-Step 35900 (epoch 45.91), Elapsed: 8902.1 ms, LR: 0.0000, Loss: 0.0177 Hint loss: 0.0000
+[Validation] Epoch: 296.00, Elapsed: 5093.4 ms, Error: 1.07
 
-[Validation] Epoch: 46.00, Elapsed: 2671.5 ms, Error: 1.20
+Step 231500 (epoch 296.04), Elapsed: 9252.2 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 231600 (epoch 296.16), Elapsed: 9241.5 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 231700 (epoch 296.29), Elapsed: 9277.3 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 231800 (epoch 296.42), Elapsed: 9243.7 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 231900 (epoch 296.55), Elapsed: 9261.0 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 232000 (epoch 296.68), Elapsed: 9276.0 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 232100 (epoch 296.80), Elapsed: 9261.5 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 232200 (epoch 296.93), Elapsed: 9264.5 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
 
-Step 36000 (epoch 46.04), Elapsed: 8889.2 ms, LR: 0.0000, Loss: 0.0183 Hint loss: 0.0000
-Step 36100 (epoch 46.16), Elapsed: 8901.4 ms, LR: 0.0000, Loss: 0.0176 Hint loss: 0.0000
-Step 36200 (epoch 46.29), Elapsed: 8900.5 ms, LR: 0.0000, Loss: 0.0181 Hint loss: 0.0000
-Step 36300 (epoch 46.42), Elapsed: 8886.2 ms, LR: 0.0000, Loss: 0.0176 Hint loss: 0.0000
-Step 36400 (epoch 46.55), Elapsed: 8895.5 ms, LR: 0.0000, Loss: 0.0177 Hint loss: 0.0000
-Step 36500 (epoch 46.68), Elapsed: 8889.3 ms, LR: 0.0000, Loss: 0.0176 Hint loss: 0.0000
-Step 36600 (epoch 46.80), Elapsed: 8902.1 ms, LR: 0.0000, Loss: 0.0194 Hint loss: 0.0000
-Step 36700 (epoch 46.93), Elapsed: 8898.2 ms, LR: 0.0000, Loss: 0.0177 Hint loss: 0.0000
+[Validation] Epoch: 297.00, Elapsed: 4994.9 ms, Error: 1.08
 
-[Validation] Epoch: 47.00, Elapsed: 2669.2 ms, Error: 1.20
+Step 232300 (epoch 297.06), Elapsed: 9242.4 ms, LR: 0.0000, Loss: 0.0042 Hint loss: 0.0000
+Step 232400 (epoch 297.19), Elapsed: 9254.1 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 232500 (epoch 297.31), Elapsed: 9223.2 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 232600 (epoch 297.44), Elapsed: 9240.1 ms, LR: 0.0000, Loss: 0.0043 Hint loss: 0.0000
+Step 232700 (epoch 297.57), Elapsed: 9243.8 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 232800 (epoch 297.70), Elapsed: 9254.9 ms, LR: 0.0000, Loss: 0.0044 Hint loss: 0.0000
+Step 232900 (epoch 297.83), Elapsed: 9240.3 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 233000 (epoch 297.95), Elapsed: 9262.9 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
 
-Step 36800 (epoch 47.06), Elapsed: 8887.5 ms, LR: 0.0000, Loss: 0.0178 Hint loss: 0.0000
-Step 36900 (epoch 47.19), Elapsed: 8904.5 ms, LR: 0.0000, Loss: 0.0174 Hint loss: 0.0000
-Step 37000 (epoch 47.31), Elapsed: 8892.0 ms, LR: 0.0000, Loss: 0.0177 Hint loss: 0.0000
-Step 37100 (epoch 47.44), Elapsed: 8892.8 ms, LR: 0.0000, Loss: 0.0173 Hint loss: 0.0000
-Step 37200 (epoch 47.57), Elapsed: 8895.4 ms, LR: 0.0000, Loss: 0.0173 Hint loss: 0.0000
-Step 37300 (epoch 47.70), Elapsed: 8891.0 ms, LR: 0.0000, Loss: 0.0172 Hint loss: 0.0000
-Step 37400 (epoch 47.83), Elapsed: 8892.1 ms, LR: 0.0000, Loss: 0.0173 Hint loss: 0.0000
-Step 37500 (epoch 47.95), Elapsed: 8891.1 ms, LR: 0.0000, Loss: 0.0171 Hint loss: 0.0000
+[Validation] Epoch: 298.00, Elapsed: 4263.9 ms, Error: 1.08
 
-[Validation] Epoch: 48.00, Elapsed: 2671.5 ms, Error: 1.16
+Step 233100 (epoch 298.08), Elapsed: 9243.2 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 233200 (epoch 298.21), Elapsed: 9225.3 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 233300 (epoch 298.34), Elapsed: 9251.7 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 233400 (epoch 298.47), Elapsed: 9246.1 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 233500 (epoch 298.59), Elapsed: 9269.8 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 233600 (epoch 298.72), Elapsed: 9267.0 ms, LR: 0.0000, Loss: 0.0043 Hint loss: 0.0000
+Step 233700 (epoch 298.85), Elapsed: 9255.2 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 233800 (epoch 298.98), Elapsed: 9242.8 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
 
-Step 37600 (epoch 48.08), Elapsed: 8891.9 ms, LR: 0.0000, Loss: 0.0172 Hint loss: 0.0000
-Step 37700 (epoch 48.21), Elapsed: 8891.9 ms, LR: 0.0000, Loss: 0.0172 Hint loss: 0.0000
-Step 37800 (epoch 48.34), Elapsed: 8894.7 ms, LR: 0.0000, Loss: 0.0181 Hint loss: 0.0000
-Step 37900 (epoch 48.47), Elapsed: 8891.1 ms, LR: 0.0000, Loss: 0.0174 Hint loss: 0.0000
-Step 38000 (epoch 48.59), Elapsed: 8906.5 ms, LR: 0.0000, Loss: 0.0170 Hint loss: 0.0000
-Step 38100 (epoch 48.72), Elapsed: 8894.0 ms, LR: 0.0000, Loss: 0.0169 Hint loss: 0.0000
-Step 38200 (epoch 48.85), Elapsed: 8889.7 ms, LR: 0.0000, Loss: 0.0168 Hint loss: 0.0000
-Step 38300 (epoch 48.98), Elapsed: 8900.5 ms, LR: 0.0000, Loss: 0.0171 Hint loss: 0.0000
+[Validation] Epoch: 299.00, Elapsed: 4493.4 ms, Error: 1.06
 
-[Validation] Epoch: 49.00, Elapsed: 2671.5 ms, Error: 1.17
+Step 233900 (epoch 299.10), Elapsed: 9251.4 ms, LR: 0.0000, Loss: 0.0042 Hint loss: 0.0000
+Step 234000 (epoch 299.23), Elapsed: 9240.5 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 234100 (epoch 299.36), Elapsed: 9243.3 ms, LR: 0.0000, Loss: 0.0039 Hint loss: 0.0000
+Step 234200 (epoch 299.49), Elapsed: 9251.3 ms, LR: 0.0000, Loss: 0.0039 Hint loss: 0.0000
+Step 234300 (epoch 299.62), Elapsed: 9228.4 ms, LR: 0.0000, Loss: 0.0041 Hint loss: 0.0000
+Step 234400 (epoch 299.74), Elapsed: 9246.9 ms, LR: 0.0000, Loss: 0.0040 Hint loss: 0.0000
+Step 234500 (epoch 299.87), Elapsed: 9248.9 ms, LR: 0.0000, Loss: 0.0039 Hint loss: 0.0000
 
-Step 38400 (epoch 49.10), Elapsed: 8895.1 ms, LR: 0.0000, Loss: 0.0172 Hint loss: 0.0000
-Step 38500 (epoch 49.23), Elapsed: 8894.4 ms, LR: 0.0000, Loss: 0.0168 Hint loss: 0.0000
-Step 38600 (epoch 49.36), Elapsed: 8897.7 ms, LR: 0.0000, Loss: 0.0168 Hint loss: 0.0000
-Step 38700 (epoch 49.49), Elapsed: 8890.9 ms, LR: 0.0000, Loss: 0.0165 Hint loss: 0.0000
-Step 38800 (epoch 49.62), Elapsed: 8898.0 ms, LR: 0.0000, Loss: 0.0165 Hint loss: 0.0000
-Step 38900 (epoch 49.74), Elapsed: 8889.2 ms, LR: 0.0000, Loss: 0.0168 Hint loss: 0.0000
-Step 39000 (epoch 49.87), Elapsed: 8890.9 ms, LR: 0.0000, Loss: 0.0171 Hint loss: 0.0000
-
-[Validation] Epoch: 50.00, Elapsed: 2666.5 ms, Error: 1.23
-
-Step 39100 (epoch 50.00), Elapsed: 8901.8 ms, LR: 0.0000, Loss: 0.0166 Hint loss: 0.0000
+[Validation] Epoch: 300.00, Elapsed: 4839.8 ms, Error: 1.02
 ```
 
 * DCN without hint objective
 ```
-[Validation] Epoch: 40.00, Elapsed: 8977.9 ms, Error: 1.51
+Step 226800 (epoch 290.03), Elapsed: 8785.4 ms, LR: 0.0000, Loss: 0.0151 Hint loss: 140.5566
+Step 226900 (epoch 290.15), Elapsed: 8795.0 ms, LR: 0.0000, Loss: 0.0159 Hint loss: 145.1720
+Step 227000 (epoch 290.28), Elapsed: 8929.4 ms, LR: 0.0000, Loss: 0.0145 Hint loss: 152.0311
+Step 227100 (epoch 290.41), Elapsed: 8850.0 ms, LR: 0.0000, Loss: 0.0169 Hint loss: 142.2562
+Step 227200 (epoch 290.54), Elapsed: 8924.5 ms, LR: 0.0000, Loss: 0.0142 Hint loss: 148.6252
+Step 227300 (epoch 290.66), Elapsed: 8877.4 ms, LR: 0.0000, Loss: 0.0143 Hint loss: 142.6112
+Step 227400 (epoch 290.79), Elapsed: 8599.6 ms, LR: 0.0000, Loss: 0.0224 Hint loss: 144.5831
+Step 227500 (epoch 290.92), Elapsed: 8886.5 ms, LR: 0.0000, Loss: 0.0147 Hint loss: 142.7310
 
-Step 31300 (epoch 40.03), Elapsed: 11141.9 ms, LR: 0.0000, Loss: 0.0353 Hint loss: 106.4182
-Step 31400 (epoch 40.15), Elapsed: 11117.0 ms, LR: 0.0000, Loss: 0.0384 Hint loss: 99.3636
-Step 31500 (epoch 40.28), Elapsed: 11160.9 ms, LR: 0.0000, Loss: 0.0373 Hint loss: 103.5755
-Step 31600 (epoch 40.41), Elapsed: 11208.3 ms, LR: 0.0000, Loss: 0.0443 Hint loss: 100.2382
-Step 31700 (epoch 40.54), Elapsed: 11348.3 ms, LR: 0.0000, Loss: 0.0385 Hint loss: 100.2246
-Step 31800 (epoch 40.66), Elapsed: 11690.9 ms, LR: 0.0000, Loss: 0.0364 Hint loss: 104.1788
-Step 31900 (epoch 40.79), Elapsed: 12064.7 ms, LR: 0.0000, Loss: 0.0350 Hint loss: 96.9056
-Step 32000 (epoch 40.92), Elapsed: 12124.7 ms, LR: 0.0000, Loss: 0.0349 Hint loss: 98.5311
+[Validation] Epoch: 291.00, Elapsed: 10625.1 ms, Error: 1.38
 
-[Validation] Epoch: 41.00, Elapsed: 9539.6 ms, Error: 1.45
+Step 227600 (epoch 291.05), Elapsed: 8960.8 ms, LR: 0.0000, Loss: 0.0142 Hint loss: 153.9186
+Step 227700 (epoch 291.18), Elapsed: 8787.3 ms, LR: 0.0000, Loss: 0.0141 Hint loss: 153.5106
+Step 227800 (epoch 291.30), Elapsed: 8964.0 ms, LR: 0.0000, Loss: 0.0144 Hint loss: 146.8593
+Step 227900 (epoch 291.43), Elapsed: 8749.9 ms, LR: 0.0000, Loss: 0.0165 Hint loss: 139.4108
+Step 228000 (epoch 291.56), Elapsed: 8837.5 ms, LR: 0.0000, Loss: 0.0141 Hint loss: 140.7742
+Step 228100 (epoch 291.69), Elapsed: 8907.0 ms, LR: 0.0000, Loss: 0.0153 Hint loss: 139.0107
+Step 228200 (epoch 291.82), Elapsed: 8989.3 ms, LR: 0.0000, Loss: 0.0173 Hint loss: 139.3120
+Step 228300 (epoch 291.94), Elapsed: 8778.1 ms, LR: 0.0000, Loss: 0.0142 Hint loss: 152.0138
 
-Step 32100 (epoch 41.05), Elapsed: 12038.4 ms, LR: 0.0000, Loss: 0.0348 Hint loss: 98.7128
-Step 32200 (epoch 41.18), Elapsed: 12061.8 ms, LR: 0.0000, Loss: 0.0346 Hint loss: 105.0991
-Step 32300 (epoch 41.30), Elapsed: 11972.6 ms, LR: 0.0000, Loss: 0.0391 Hint loss: 101.4495
-Step 32400 (epoch 41.43), Elapsed: 11996.3 ms, LR: 0.0000, Loss: 0.0365 Hint loss: 97.0989
-Step 32500 (epoch 41.56), Elapsed: 12026.7 ms, LR: 0.0000, Loss: 0.0354 Hint loss: 97.3752
-Step 32600 (epoch 41.69), Elapsed: 12057.3 ms, LR: 0.0000, Loss: 0.0350 Hint loss: 97.3694
-Step 32700 (epoch 41.82), Elapsed: 11985.4 ms, LR: 0.0000, Loss: 0.0347 Hint loss: 97.0989
-Step 32800 (epoch 41.94), Elapsed: 12171.2 ms, LR: 0.0000, Loss: 0.0359 Hint loss: 99.2992
+[Validation] Epoch: 292.00, Elapsed: 10245.9 ms, Error: 1.44
 
-[Validation] Epoch: 42.00, Elapsed: 9553.1 ms, Error: 1.47
+Step 228400 (epoch 292.07), Elapsed: 8994.7 ms, LR: 0.0000, Loss: 0.0143 Hint loss: 144.2561
+Step 228500 (epoch 292.20), Elapsed: 8811.0 ms, LR: 0.0000, Loss: 0.0141 Hint loss: 136.9738
+Step 228600 (epoch 292.33), Elapsed: 8843.2 ms, LR: 0.0000, Loss: 0.0149 Hint loss: 149.8417
+Step 228700 (epoch 292.46), Elapsed: 8781.2 ms, LR: 0.0000, Loss: 0.0155 Hint loss: 153.1330
+Step 228800 (epoch 292.58), Elapsed: 8839.1 ms, LR: 0.0000, Loss: 0.0164 Hint loss: 151.2229
+Step 228900 (epoch 292.71), Elapsed: 8861.1 ms, LR: 0.0000, Loss: 0.0175 Hint loss: 142.4727
+Step 229000 (epoch 292.84), Elapsed: 8883.7 ms, LR: 0.0000, Loss: 0.0148 Hint loss: 141.8695
+Step 229100 (epoch 292.97), Elapsed: 8808.3 ms, LR: 0.0000, Loss: 0.0142 Hint loss: 144.9092
 
-Step 32900 (epoch 42.07), Elapsed: 12059.4 ms, LR: 0.0000, Loss: 0.0359 Hint loss: 98.3476
-Step 33000 (epoch 42.20), Elapsed: 11998.7 ms, LR: 0.0000, Loss: 0.0343 Hint loss: 97.3388
-Step 33100 (epoch 42.33), Elapsed: 11974.4 ms, LR: 0.0000, Loss: 0.0461 Hint loss: 98.1271
-Step 33200 (epoch 42.46), Elapsed: 11993.7 ms, LR: 0.0000, Loss: 0.0386 Hint loss: 99.2695
-Step 33300 (epoch 42.58), Elapsed: 11950.6 ms, LR: 0.0000, Loss: 0.0452 Hint loss: 101.7823
-Step 33400 (epoch 42.71), Elapsed: 11977.1 ms, LR: 0.0000, Loss: 0.0344 Hint loss: 94.3337
-Step 33500 (epoch 42.84), Elapsed: 12014.9 ms, LR: 0.0000, Loss: 0.0357 Hint loss: 94.7903
-Step 33600 (epoch 42.97), Elapsed: 12031.8 ms, LR: 0.0000, Loss: 0.0355 Hint loss: 98.9343
+[Validation] Epoch: 293.00, Elapsed: 10523.7 ms, Error: 1.42
 
-[Validation] Epoch: 43.00, Elapsed: 9492.7 ms, Error: 1.63
+Step 229200 (epoch 293.09), Elapsed: 8858.2 ms, LR: 0.0000, Loss: 0.0149 Hint loss: 149.5001
+Step 229300 (epoch 293.22), Elapsed: 8811.4 ms, LR: 0.0000, Loss: 0.0176 Hint loss: 143.4723
+Step 229400 (epoch 293.35), Elapsed: 9023.6 ms, LR: 0.0000, Loss: 0.0162 Hint loss: 144.8050
+Step 229500 (epoch 293.48), Elapsed: 8871.7 ms, LR: 0.0000, Loss: 0.0147 Hint loss: 145.9355
+Step 229600 (epoch 293.61), Elapsed: 8747.7 ms, LR: 0.0000, Loss: 0.0142 Hint loss: 143.7787
+Step 229700 (epoch 293.73), Elapsed: 8809.1 ms, LR: 0.0000, Loss: 0.0169 Hint loss: 140.3045
+Step 229800 (epoch 293.86), Elapsed: 8920.7 ms, LR: 0.0000, Loss: 0.0146 Hint loss: 146.5044
+Step 229900 (epoch 293.99), Elapsed: 8758.8 ms, LR: 0.0000, Loss: 0.0161 Hint loss: 143.6587
 
-Step 33700 (epoch 43.09), Elapsed: 12035.9 ms, LR: 0.0000, Loss: 0.0370 Hint loss: 97.6984
-Step 33800 (epoch 43.22), Elapsed: 12048.6 ms, LR: 0.0000, Loss: 0.0361 Hint loss: 102.7230
-Step 33900 (epoch 43.35), Elapsed: 12023.8 ms, LR: 0.0000, Loss: 0.0383 Hint loss: 100.5490
-Step 34000 (epoch 43.48), Elapsed: 11969.9 ms, LR: 0.0000, Loss: 0.0436 Hint loss: 93.8176
-Step 34100 (epoch 43.61), Elapsed: 12019.8 ms, LR: 0.0000, Loss: 0.0355 Hint loss: 87.0270
-Step 34200 (epoch 43.73), Elapsed: 12103.3 ms, LR: 0.0000, Loss: 0.0351 Hint loss: 87.2292
-Step 34300 (epoch 43.86), Elapsed: 12113.0 ms, LR: 0.0000, Loss: 0.0352 Hint loss: 95.8945
-Step 34400 (epoch 43.99), Elapsed: 12064.2 ms, LR: 0.0000, Loss: 0.0351 Hint loss: 90.4202
+[Validation] Epoch: 294.00, Elapsed: 10459.7 ms, Error: 1.38
 
-[Validation] Epoch: 44.00, Elapsed: 9571.9 ms, Error: 1.47
+Step 230000 (epoch 294.12), Elapsed: 8855.6 ms, LR: 0.0000, Loss: 0.0143 Hint loss: 148.2706
+Step 230100 (epoch 294.25), Elapsed: 8912.5 ms, LR: 0.0000, Loss: 0.0168 Hint loss: 142.8831
+Step 230200 (epoch 294.37), Elapsed: 8878.7 ms, LR: 0.0000, Loss: 0.0141 Hint loss: 151.0914
+Step 230300 (epoch 294.50), Elapsed: 8739.2 ms, LR: 0.0000, Loss: 0.0142 Hint loss: 146.8802
+Step 230400 (epoch 294.63), Elapsed: 8797.3 ms, LR: 0.0000, Loss: 0.0145 Hint loss: 144.5435
+Step 230500 (epoch 294.76), Elapsed: 8922.8 ms, LR: 0.0000, Loss: 0.0151 Hint loss: 138.8512
+Step 230600 (epoch 294.88), Elapsed: 8798.5 ms, LR: 0.0000, Loss: 0.0144 Hint loss: 147.0982
 
-Step 34500 (epoch 44.12), Elapsed: 12053.7 ms, LR: 0.0000, Loss: 0.0383 Hint loss: 94.2170
-Step 34600 (epoch 44.25), Elapsed: 12053.3 ms, LR: 0.0000, Loss: 0.0342 Hint loss: 97.6082
-Step 34700 (epoch 44.37), Elapsed: 11996.5 ms, LR: 0.0000, Loss: 0.0359 Hint loss: 98.0818
-Step 34800 (epoch 44.50), Elapsed: 12080.9 ms, LR: 0.0000, Loss: 0.0728 Hint loss: 106.9778
-Step 34900 (epoch 44.63), Elapsed: 12072.5 ms, LR: 0.0000, Loss: 0.0350 Hint loss: 90.6349
-Step 35000 (epoch 44.76), Elapsed: 11934.2 ms, LR: 0.0000, Loss: 0.0344 Hint loss: 97.5697
-Step 35100 (epoch 44.88), Elapsed: 12060.2 ms, LR: 0.0000, Loss: 0.0342 Hint loss: 96.3839
+[Validation] Epoch: 295.00, Elapsed: 10150.6 ms, Error: 1.50
 
-[Validation] Epoch: 45.00, Elapsed: 9547.2 ms, Error: 1.53
+Step 230700 (epoch 295.01), Elapsed: 8841.0 ms, LR: 0.0000, Loss: 0.0144 Hint loss: 150.0737
+Step 230800 (epoch 295.14), Elapsed: 8830.3 ms, LR: 0.0000, Loss: 0.0145 Hint loss: 148.4242
+Step 230900 (epoch 295.27), Elapsed: 8895.8 ms, LR: 0.0000, Loss: 0.0139 Hint loss: 142.8199
+Step 231000 (epoch 295.40), Elapsed: 8825.8 ms, LR: 0.0000, Loss: 0.0141 Hint loss: 147.1053
+Step 231100 (epoch 295.52), Elapsed: 8746.1 ms, LR: 0.0000, Loss: 0.0154 Hint loss: 145.1556
+Step 231200 (epoch 295.65), Elapsed: 8861.3 ms, LR: 0.0000, Loss: 0.0146 Hint loss: 150.5138
+Step 231300 (epoch 295.78), Elapsed: 8949.1 ms, LR: 0.0000, Loss: 0.0141 Hint loss: 152.0608
+Step 231400 (epoch 295.91), Elapsed: 8834.2 ms, LR: 0.0000, Loss: 0.0145 Hint loss: 142.8384
 
-Step 35200 (epoch 45.01), Elapsed: 11972.9 ms, LR: 0.0000, Loss: 0.0348 Hint loss: 95.7466
-Step 35300 (epoch 45.14), Elapsed: 12013.2 ms, LR: 0.0000, Loss: 0.0350 Hint loss: 89.9611
-Step 35400 (epoch 45.27), Elapsed: 11927.5 ms, LR: 0.0000, Loss: 0.0340 Hint loss: 96.7048
-Step 35500 (epoch 45.40), Elapsed: 11973.7 ms, LR: 0.0000, Loss: 0.0390 Hint loss: 98.8128
-Step 35600 (epoch 45.52), Elapsed: 11975.4 ms, LR: 0.0000, Loss: 0.0364 Hint loss: 92.7995
-Step 35700 (epoch 45.65), Elapsed: 11968.5 ms, LR: 0.0000, Loss: 0.0347 Hint loss: 88.1528
-Step 35800 (epoch 45.78), Elapsed: 12070.6 ms, LR: 0.0000, Loss: 0.0358 Hint loss: 97.7022
-Step 35900 (epoch 45.91), Elapsed: 12127.7 ms, LR: 0.0000, Loss: 0.0388 Hint loss: 95.1412
+[Validation] Epoch: 296.00, Elapsed: 10195.9 ms, Error: 1.41
 
-[Validation] Epoch: 46.00, Elapsed: 9533.5 ms, Error: 1.57
+Step 231500 (epoch 296.04), Elapsed: 8922.9 ms, LR: 0.0000, Loss: 0.0156 Hint loss: 151.1056
+Step 231600 (epoch 296.16), Elapsed: 8919.9 ms, LR: 0.0000, Loss: 0.0148 Hint loss: 156.8548
+Step 231700 (epoch 296.29), Elapsed: 8975.1 ms, LR: 0.0000, Loss: 0.0143 Hint loss: 150.7839
+Step 231800 (epoch 296.42), Elapsed: 8864.1 ms, LR: 0.0000, Loss: 0.0153 Hint loss: 141.7013
+Step 231900 (epoch 296.55), Elapsed: 8857.3 ms, LR: 0.0000, Loss: 0.0141 Hint loss: 142.0977
+Step 232000 (epoch 296.68), Elapsed: 8978.7 ms, LR: 0.0000, Loss: 0.0148 Hint loss: 152.2045
+Step 232100 (epoch 296.80), Elapsed: 8791.5 ms, LR: 0.0000, Loss: 0.0169 Hint loss: 145.3065
+Step 232200 (epoch 296.93), Elapsed: 8822.5 ms, LR: 0.0000, Loss: 0.0144 Hint loss: 157.7260
 
-Step 36000 (epoch 46.04), Elapsed: 11993.4 ms, LR: 0.0000, Loss: 0.0351 Hint loss: 90.7602
-Step 36100 (epoch 46.16), Elapsed: 11940.5 ms, LR: 0.0000, Loss: 0.0336 Hint loss: 91.0333
-Step 36200 (epoch 46.29), Elapsed: 11995.6 ms, LR: 0.0000, Loss: 0.0493 Hint loss: 98.7799
-Step 36300 (epoch 46.42), Elapsed: 11896.7 ms, LR: 0.0000, Loss: 0.0346 Hint loss: 94.8729
-Step 36400 (epoch 46.55), Elapsed: 11938.3 ms, LR: 0.0000, Loss: 0.0377 Hint loss: 93.6889
-Step 36500 (epoch 46.68), Elapsed: 11905.0 ms, LR: 0.0000, Loss: 0.0340 Hint loss: 97.5995
-Step 36600 (epoch 46.80), Elapsed: 11932.9 ms, LR: 0.0000, Loss: 0.0356 Hint loss: 89.2434
-Step 36700 (epoch 46.93), Elapsed: 12095.2 ms, LR: 0.0000, Loss: 0.0339 Hint loss: 96.6894
+[Validation] Epoch: 297.00, Elapsed: 9870.3 ms, Error: 1.51
 
-[Validation] Epoch: 47.00, Elapsed: 9524.3 ms, Error: 1.44
+Step 232300 (epoch 297.06), Elapsed: 8903.2 ms, LR: 0.0000, Loss: 0.0149 Hint loss: 145.8231
+Step 232400 (epoch 297.19), Elapsed: 8807.7 ms, LR: 0.0000, Loss: 0.0139 Hint loss: 145.0216
+Step 232500 (epoch 297.31), Elapsed: 9031.0 ms, LR: 0.0000, Loss: 0.0143 Hint loss: 142.4312
+Step 232600 (epoch 297.44), Elapsed: 8765.8 ms, LR: 0.0000, Loss: 0.0139 Hint loss: 153.0089
+Step 232700 (epoch 297.57), Elapsed: 8888.1 ms, LR: 0.0000, Loss: 0.0148 Hint loss: 143.9904
+Step 232800 (epoch 297.70), Elapsed: 8753.2 ms, LR: 0.0000, Loss: 0.0144 Hint loss: 149.5293
+Step 232900 (epoch 297.83), Elapsed: 8880.4 ms, LR: 0.0000, Loss: 0.0142 Hint loss: 152.8657
+Step 233000 (epoch 297.95), Elapsed: 8774.6 ms, LR: 0.0000, Loss: 0.0152 Hint loss: 145.9120
 
-Step 36800 (epoch 47.06), Elapsed: 11907.0 ms, LR: 0.0000, Loss: 0.0334 Hint loss: 93.1803
-Step 36900 (epoch 47.19), Elapsed: 11888.5 ms, LR: 0.0000, Loss: 0.0339 Hint loss: 97.3097
-Step 37000 (epoch 47.31), Elapsed: 12019.8 ms, LR: 0.0000, Loss: 0.0339 Hint loss: 93.5960
-Step 37100 (epoch 47.44), Elapsed: 11947.5 ms, LR: 0.0000, Loss: 0.0345 Hint loss: 95.7494
-Step 37200 (epoch 47.57), Elapsed: 12018.3 ms, LR: 0.0000, Loss: 0.0343 Hint loss: 99.7749
-Step 37300 (epoch 47.70), Elapsed: 11917.0 ms, LR: 0.0000, Loss: 0.0337 Hint loss: 96.0459
-Step 37400 (epoch 47.83), Elapsed: 12005.8 ms, LR: 0.0000, Loss: 0.0334 Hint loss: 94.5175
-Step 37500 (epoch 47.95), Elapsed: 12047.4 ms, LR: 0.0000, Loss: 0.0344 Hint loss: 99.3840
+[Validation] Epoch: 298.00, Elapsed: 10043.2 ms, Error: 1.39
 
-[Validation] Epoch: 48.00, Elapsed: 9538.6 ms, Error: 1.52
+Step 233100 (epoch 298.08), Elapsed: 8851.3 ms, LR: 0.0000, Loss: 0.0140 Hint loss: 146.8957
+Step 233200 (epoch 298.21), Elapsed: 8814.8 ms, LR: 0.0000, Loss: 0.0139 Hint loss: 146.9237
+Step 233300 (epoch 298.34), Elapsed: 8897.6 ms, LR: 0.0000, Loss: 0.0141 Hint loss: 151.6163
+Step 233400 (epoch 298.47), Elapsed: 8875.2 ms, LR: 0.0000, Loss: 0.0143 Hint loss: 149.1765
+Step 233500 (epoch 298.59), Elapsed: 8778.8 ms, LR: 0.0000, Loss: 0.0145 Hint loss: 139.9828
+Step 233600 (epoch 298.72), Elapsed: 8786.9 ms, LR: 0.0000, Loss: 0.0146 Hint loss: 140.4219
+Step 233700 (epoch 298.85), Elapsed: 8716.7 ms, LR: 0.0000, Loss: 0.0144 Hint loss: 146.3438
+Step 233800 (epoch 298.98), Elapsed: 8868.1 ms, LR: 0.0000, Loss: 0.0147 Hint loss: 143.4257
 
-Step 37600 (epoch 48.08), Elapsed: 11984.2 ms, LR: 0.0000, Loss: 0.0355 Hint loss: 100.0203
-Step 37700 (epoch 48.21), Elapsed: 11918.2 ms, LR: 0.0000, Loss: 0.0354 Hint loss: 99.8090
-Step 37800 (epoch 48.34), Elapsed: 11924.8 ms, LR: 0.0000, Loss: 0.0435 Hint loss: 92.5132
-Step 37900 (epoch 48.47), Elapsed: 12035.7 ms, LR: 0.0000, Loss: 0.0340 Hint loss: 104.9256
-Step 38000 (epoch 48.59), Elapsed: 11964.8 ms, LR: 0.0000, Loss: 0.0375 Hint loss: 97.8294
-Step 38100 (epoch 48.72), Elapsed: 11927.5 ms, LR: 0.0000, Loss: 0.0358 Hint loss: 98.1366
-Step 38200 (epoch 48.85), Elapsed: 12040.7 ms, LR: 0.0000, Loss: 0.0350 Hint loss: 100.5713
-Step 38300 (epoch 48.98), Elapsed: 12048.5 ms, LR: 0.0000, Loss: 0.0371 Hint loss: 96.9352
+[Validation] Epoch: 299.00, Elapsed: 10164.8 ms, Error: 1.46
 
-[Validation] Epoch: 49.00, Elapsed: 9550.7 ms, Error: 1.49
+Step 233900 (epoch 299.10), Elapsed: 8752.9 ms, LR: 0.0000, Loss: 0.0142 Hint loss: 150.7824
+Step 234000 (epoch 299.23), Elapsed: 8731.2 ms, LR: 0.0000, Loss: 0.0139 Hint loss: 149.9018
+Step 234100 (epoch 299.36), Elapsed: 8959.3 ms, LR: 0.0000, Loss: 0.0142 Hint loss: 143.6503
+Step 234200 (epoch 299.49), Elapsed: 8808.8 ms, LR: 0.0000, Loss: 0.0140 Hint loss: 148.8103
+Step 234300 (epoch 299.62), Elapsed: 8818.4 ms, LR: 0.0000, Loss: 0.0140 Hint loss: 154.3216
+Step 234400 (epoch 299.74), Elapsed: 8995.8 ms, LR: 0.0000, Loss: 0.0140 Hint loss: 143.6152
+Step 234500 (epoch 299.87), Elapsed: 8852.7 ms, LR: 0.0000, Loss: 0.0148 Hint loss: 156.2379
 
-Step 38400 (epoch 49.10), Elapsed: 11953.9 ms, LR: 0.0000, Loss: 0.0333 Hint loss: 93.2281
-Step 38500 (epoch 49.23), Elapsed: 11978.9 ms, LR: 0.0000, Loss: 0.0338 Hint loss: 95.0153
-Step 38600 (epoch 49.36), Elapsed: 11991.4 ms, LR: 0.0000, Loss: 0.0335 Hint loss: 93.3222
-Step 38700 (epoch 49.49), Elapsed: 11861.3 ms, LR: 0.0000, Loss: 0.0341 Hint loss: 95.0970
-Step 38800 (epoch 49.62), Elapsed: 11906.8 ms, LR: 0.0000, Loss: 0.0330 Hint loss: 92.9684
-Step 38900 (epoch 49.74), Elapsed: 11963.8 ms, LR: 0.0000, Loss: 0.0336 Hint loss: 99.8751
-Step 39000 (epoch 49.87), Elapsed: 12048.9 ms, LR: 0.0000, Loss: 0.0427 Hint loss: 94.3697
-
-[Validation] Epoch: 50.00, Elapsed: 9590.4 ms, Error: 1.52
-
-Step 39100 (epoch 50.00), Elapsed: 11963.6 ms, LR: 0.0000, Loss: 0.0350 Hint loss: 99.4407
+[Validation] Epoch: 300.00, Elapsed: 9840.2 ms, Error: 1.49
 ```
 
 * DCN with hint objective
 ```
-[Validation] Epoch: 40.00, Elapsed: 9609.4 ms, Error: 1.55
+Step 226800 (epoch 290.03), Elapsed: 8942.4 ms, LR: 0.0000, Loss: 0.0116 Hint loss: 4.8372
+Step 226900 (epoch 290.15), Elapsed: 8846.7 ms, LR: 0.0000, Loss: 0.0116 Hint loss: 4.8114
+Step 227000 (epoch 290.28), Elapsed: 8904.0 ms, LR: 0.0000, Loss: 0.0123 Hint loss: 5.1334
+Step 227100 (epoch 290.41), Elapsed: 8825.9 ms, LR: 0.0000, Loss: 0.0127 Hint loss: 4.9805
+Step 227200 (epoch 290.54), Elapsed: 8984.5 ms, LR: 0.0000, Loss: 0.0118 Hint loss: 4.9500
+Step 227300 (epoch 290.66), Elapsed: 8848.2 ms, LR: 0.0000, Loss: 0.0122 Hint loss: 4.9223
+Step 227400 (epoch 290.79), Elapsed: 8759.7 ms, LR: 0.0000, Loss: 0.0142 Hint loss: 5.2011
+Step 227500 (epoch 290.92), Elapsed: 9105.3 ms, LR: 0.0000, Loss: 0.0121 Hint loss: 4.9261
 
-Step 31300 (epoch 40.03), Elapsed: 12123.1 ms, LR: 0.0000, Loss: 0.0481 Hint loss: 8.1279
-Step 31400 (epoch 40.15), Elapsed: 12236.9 ms, LR: 0.0000, Loss: 0.0514 Hint loss: 8.3041
-Step 31500 (epoch 40.28), Elapsed: 12204.1 ms, LR: 0.0000, Loss: 0.0324 Hint loss: 7.9792
-Step 31600 (epoch 40.41), Elapsed: 12058.2 ms, LR: 0.0000, Loss: 0.0317 Hint loss: 8.2941
-Step 31700 (epoch 40.54), Elapsed: 11958.0 ms, LR: 0.0000, Loss: 0.0323 Hint loss: 7.7475
-Step 31800 (epoch 40.66), Elapsed: 11999.3 ms, LR: 0.0000, Loss: 0.0331 Hint loss: 8.3960
-Step 31900 (epoch 40.79), Elapsed: 12032.4 ms, LR: 0.0000, Loss: 0.0316 Hint loss: 7.9445
-Step 32000 (epoch 40.92), Elapsed: 12034.6 ms, LR: 0.0000, Loss: 0.0334 Hint loss: 7.7186
+[Validation] Epoch: 291.00, Elapsed: 10333.4 ms, Error: 1.19
 
-[Validation] Epoch: 41.00, Elapsed: 9630.6 ms, Error: 1.46
+Step 227600 (epoch 291.05), Elapsed: 8958.3 ms, LR: 0.0000, Loss: 0.0139 Hint loss: 4.9091
+Step 227700 (epoch 291.18), Elapsed: 8987.6 ms, LR: 0.0000, Loss: 0.0114 Hint loss: 4.7313
+Step 227800 (epoch 291.30), Elapsed: 8957.2 ms, LR: 0.0000, Loss: 0.0119 Hint loss: 4.7831
+Step 227900 (epoch 291.43), Elapsed: 8949.5 ms, LR: 0.0000, Loss: 0.0115 Hint loss: 4.8308
+Step 228000 (epoch 291.56), Elapsed: 8950.6 ms, LR: 0.0000, Loss: 0.0118 Hint loss: 4.7272
+Step 228100 (epoch 291.69), Elapsed: 8726.6 ms, LR: 0.0000, Loss: 0.0118 Hint loss: 4.9173
+Step 228200 (epoch 291.82), Elapsed: 8832.2 ms, LR: 0.0000, Loss: 0.0115 Hint loss: 5.1625
+Step 228300 (epoch 291.94), Elapsed: 8973.3 ms, LR: 0.0000, Loss: 0.0131 Hint loss: 5.1492
 
-Step 32100 (epoch 41.05), Elapsed: 12037.9 ms, LR: 0.0000, Loss: 0.0323 Hint loss: 8.1867
-Step 32200 (epoch 41.18), Elapsed: 12221.0 ms, LR: 0.0000, Loss: 0.0336 Hint loss: 8.1771
-Step 32300 (epoch 41.30), Elapsed: 12109.5 ms, LR: 0.0000, Loss: 0.0317 Hint loss: 7.8697
-Step 32400 (epoch 41.43), Elapsed: 12017.5 ms, LR: 0.0000, Loss: 0.0329 Hint loss: 7.9616
-Step 32500 (epoch 41.56), Elapsed: 11979.5 ms, LR: 0.0000, Loss: 0.0322 Hint loss: 8.0880
-Step 32600 (epoch 41.69), Elapsed: 11979.8 ms, LR: 0.0000, Loss: 0.0320 Hint loss: 7.9887
-Step 32700 (epoch 41.82), Elapsed: 11951.3 ms, LR: 0.0000, Loss: 0.0333 Hint loss: 7.8962
-Step 32800 (epoch 41.94), Elapsed: 12028.6 ms, LR: 0.0000, Loss: 0.0377 Hint loss: 8.3715
+[Validation] Epoch: 292.00, Elapsed: 10217.6 ms, Error: 1.17
 
-[Validation] Epoch: 42.00, Elapsed: 9580.7 ms, Error: 1.38
+Step 228400 (epoch 292.07), Elapsed: 8842.0 ms, LR: 0.0000, Loss: 0.0117 Hint loss: 5.1325
+Step 228500 (epoch 292.20), Elapsed: 8917.8 ms, LR: 0.0000, Loss: 0.0122 Hint loss: 4.9998
+Step 228600 (epoch 292.33), Elapsed: 8969.1 ms, LR: 0.0000, Loss: 0.0115 Hint loss: 5.0996
+Step 228700 (epoch 292.46), Elapsed: 8847.0 ms, LR: 0.0000, Loss: 0.0117 Hint loss: 5.1582
+Step 228800 (epoch 292.58), Elapsed: 8815.3 ms, LR: 0.0000, Loss: 0.0146 Hint loss: 4.7797
+Step 228900 (epoch 292.71), Elapsed: 8812.4 ms, LR: 0.0000, Loss: 0.0119 Hint loss: 4.9511
+Step 229000 (epoch 292.84), Elapsed: 8860.3 ms, LR: 0.0000, Loss: 0.0115 Hint loss: 4.9879
+Step 229100 (epoch 292.97), Elapsed: 8911.2 ms, LR: 0.0000, Loss: 0.0156 Hint loss: 4.9679
 
-Step 32900 (epoch 42.07), Elapsed: 12022.4 ms, LR: 0.0000, Loss: 0.0318 Hint loss: 7.9486
-Step 33000 (epoch 42.20), Elapsed: 12077.8 ms, LR: 0.0000, Loss: 0.0333 Hint loss: 8.0088
-Step 33100 (epoch 42.33), Elapsed: 12083.2 ms, LR: 0.0000, Loss: 0.0337 Hint loss: 7.9642
-Step 33200 (epoch 42.46), Elapsed: 12052.0 ms, LR: 0.0000, Loss: 0.0315 Hint loss: 7.5406
-Step 33300 (epoch 42.58), Elapsed: 12023.2 ms, LR: 0.0000, Loss: 0.0314 Hint loss: 7.7493
-Step 33400 (epoch 42.71), Elapsed: 11962.2 ms, LR: 0.0000, Loss: 0.0340 Hint loss: 8.0980
-Step 33500 (epoch 42.84), Elapsed: 12017.4 ms, LR: 0.0000, Loss: 0.0325 Hint loss: 8.1223
-Step 33600 (epoch 42.97), Elapsed: 12108.6 ms, LR: 0.0000, Loss: 0.0325 Hint loss: 7.9907
+[Validation] Epoch: 293.00, Elapsed: 10359.0 ms, Error: 1.20
 
-[Validation] Epoch: 43.00, Elapsed: 9537.5 ms, Error: 1.49
+Step 229200 (epoch 293.09), Elapsed: 8857.3 ms, LR: 0.0000, Loss: 0.0122 Hint loss: 5.1489
+Step 229300 (epoch 293.22), Elapsed: 8794.5 ms, LR: 0.0000, Loss: 0.0120 Hint loss: 4.7278
+Step 229400 (epoch 293.35), Elapsed: 8760.3 ms, LR: 0.0000, Loss: 0.0115 Hint loss: 5.2000
+Step 229500 (epoch 293.48), Elapsed: 8779.9 ms, LR: 0.0000, Loss: 0.0151 Hint loss: 4.8955
+Step 229600 (epoch 293.61), Elapsed: 8799.6 ms, LR: 0.0000, Loss: 0.0142 Hint loss: 5.3606
+Step 229700 (epoch 293.73), Elapsed: 8842.7 ms, LR: 0.0000, Loss: 0.0114 Hint loss: 4.7102
+Step 229800 (epoch 293.86), Elapsed: 9056.3 ms, LR: 0.0000, Loss: 0.0114 Hint loss: 4.7298
+Step 229900 (epoch 293.99), Elapsed: 8871.5 ms, LR: 0.0000, Loss: 0.0116 Hint loss: 4.9709
 
-Step 33700 (epoch 43.09), Elapsed: 12111.6 ms, LR: 0.0000, Loss: 0.0359 Hint loss: 8.1180
-Step 33800 (epoch 43.22), Elapsed: 12073.1 ms, LR: 0.0000, Loss: 0.0506 Hint loss: 8.0158
-Step 33900 (epoch 43.35), Elapsed: 11993.8 ms, LR: 0.0000, Loss: 0.0460 Hint loss: 7.6198
-Step 34000 (epoch 43.48), Elapsed: 12035.3 ms, LR: 0.0000, Loss: 0.0326 Hint loss: 7.9989
-Step 34100 (epoch 43.61), Elapsed: 12006.9 ms, LR: 0.0000, Loss: 0.0310 Hint loss: 7.9017
-Step 34200 (epoch 43.73), Elapsed: 12107.2 ms, LR: 0.0000, Loss: 0.0311 Hint loss: 8.0928
-Step 34300 (epoch 43.86), Elapsed: 12037.1 ms, LR: 0.0000, Loss: 0.0311 Hint loss: 7.9462
-Step 34400 (epoch 43.99), Elapsed: 11923.5 ms, LR: 0.0000, Loss: 0.0310 Hint loss: 7.9574
+[Validation] Epoch: 294.00, Elapsed: 10239.3 ms, Error: 1.21
 
-[Validation] Epoch: 44.00, Elapsed: 9496.2 ms, Error: 1.43
+Step 230000 (epoch 294.12), Elapsed: 8889.2 ms, LR: 0.0000, Loss: 0.0116 Hint loss: 4.9472
+Step 230100 (epoch 294.25), Elapsed: 8955.4 ms, LR: 0.0000, Loss: 0.0123 Hint loss: 4.9136
+Step 230200 (epoch 294.37), Elapsed: 8938.4 ms, LR: 0.0000, Loss: 0.0114 Hint loss: 5.1700
+Step 230300 (epoch 294.50), Elapsed: 8775.8 ms, LR: 0.0000, Loss: 0.0133 Hint loss: 5.0109
+Step 230400 (epoch 294.63), Elapsed: 8863.7 ms, LR: 0.0000, Loss: 0.0115 Hint loss: 4.9127
+Step 230500 (epoch 294.76), Elapsed: 8881.8 ms, LR: 0.0000, Loss: 0.0122 Hint loss: 4.9475
+Step 230600 (epoch 294.88), Elapsed: 8937.7 ms, LR: 0.0000, Loss: 0.0126 Hint loss: 4.6613
 
-Step 34500 (epoch 44.12), Elapsed: 11975.0 ms, LR: 0.0000, Loss: 0.0335 Hint loss: 7.9774
-Step 34600 (epoch 44.25), Elapsed: 11998.1 ms, LR: 0.0000, Loss: 0.0320 Hint loss: 7.9656
-Step 34700 (epoch 44.37), Elapsed: 11930.8 ms, LR: 0.0000, Loss: 0.0308 Hint loss: 7.8411
-Step 34800 (epoch 44.50), Elapsed: 11908.0 ms, LR: 0.0000, Loss: 0.0318 Hint loss: 8.0539
-Step 34900 (epoch 44.63), Elapsed: 12002.1 ms, LR: 0.0000, Loss: 0.0324 Hint loss: 8.0651
-Step 35000 (epoch 44.76), Elapsed: 11955.4 ms, LR: 0.0000, Loss: 0.0327 Hint loss: 7.8720
-Step 35100 (epoch 44.88), Elapsed: 12025.4 ms, LR: 0.0000, Loss: 0.0310 Hint loss: 8.1035
+[Validation] Epoch: 295.00, Elapsed: 10070.9 ms, Error: 1.24
 
-[Validation] Epoch: 45.00, Elapsed: 9493.5 ms, Error: 1.38
+Step 230700 (epoch 295.01), Elapsed: 8838.6 ms, LR: 0.0000, Loss: 0.0115 Hint loss: 5.2808
+Step 230800 (epoch 295.14), Elapsed: 8875.8 ms, LR: 0.0000, Loss: 0.0118 Hint loss: 5.1866
+Step 230900 (epoch 295.27), Elapsed: 8897.8 ms, LR: 0.0000, Loss: 0.0114 Hint loss: 4.8991
+Step 231000 (epoch 295.40), Elapsed: 8976.7 ms, LR: 0.0000, Loss: 0.0116 Hint loss: 4.8758
+Step 231100 (epoch 295.52), Elapsed: 8984.5 ms, LR: 0.0000, Loss: 0.0114 Hint loss: 5.0400
+Step 231200 (epoch 295.65), Elapsed: 8862.5 ms, LR: 0.0000, Loss: 0.0118 Hint loss: 5.5212
+Step 231300 (epoch 295.78), Elapsed: 8803.1 ms, LR: 0.0000, Loss: 0.0120 Hint loss: 5.0450
+Step 231400 (epoch 295.91), Elapsed: 8881.1 ms, LR: 0.0000, Loss: 0.0117 Hint loss: 5.0264
 
-Step 35200 (epoch 45.01), Elapsed: 12045.9 ms, LR: 0.0000, Loss: 0.0313 Hint loss: 7.9145
-Step 35300 (epoch 45.14), Elapsed: 12017.4 ms, LR: 0.0000, Loss: 0.0346 Hint loss: 7.9799
-Step 35400 (epoch 45.27), Elapsed: 12000.1 ms, LR: 0.0000, Loss: 0.0310 Hint loss: 8.1268
-Step 35500 (epoch 45.40), Elapsed: 11978.7 ms, LR: 0.0000, Loss: 0.0321 Hint loss: 8.0472
-Step 35600 (epoch 45.52), Elapsed: 11945.5 ms, LR: 0.0000, Loss: 0.0341 Hint loss: 7.9871
-Step 35700 (epoch 45.65), Elapsed: 11901.3 ms, LR: 0.0000, Loss: 0.0307 Hint loss: 8.0926
-Step 35800 (epoch 45.78), Elapsed: 11939.7 ms, LR: 0.0000, Loss: 0.0307 Hint loss: 7.6016
-Step 35900 (epoch 45.91), Elapsed: 11911.8 ms, LR: 0.0000, Loss: 0.0314 Hint loss: 8.0678
+[Validation] Epoch: 296.00, Elapsed: 10189.6 ms, Error: 1.16
 
-[Validation] Epoch: 46.00, Elapsed: 9385.3 ms, Error: 1.36
+Step 231500 (epoch 296.04), Elapsed: 8924.5 ms, LR: 0.0000, Loss: 0.0118 Hint loss: 4.7068
+Step 231600 (epoch 296.16), Elapsed: 8846.3 ms, LR: 0.0000, Loss: 0.0120 Hint loss: 4.7155
+Step 231700 (epoch 296.29), Elapsed: 8882.1 ms, LR: 0.0000, Loss: 0.0119 Hint loss: 5.1504
+Step 231800 (epoch 296.42), Elapsed: 8829.3 ms, LR: 0.0000, Loss: 0.0119 Hint loss: 4.7586
+Step 231900 (epoch 296.55), Elapsed: 8883.2 ms, LR: 0.0000, Loss: 0.0116 Hint loss: 4.7570
+Step 232000 (epoch 296.68), Elapsed: 8799.7 ms, LR: 0.0000, Loss: 0.0177 Hint loss: 5.1904
+Step 232100 (epoch 296.80), Elapsed: 9038.5 ms, LR: 0.0000, Loss: 0.0135 Hint loss: 4.6850
+Step 232200 (epoch 296.93), Elapsed: 8823.2 ms, LR: 0.0000, Loss: 0.0113 Hint loss: 4.5412
 
-Step 36000 (epoch 46.04), Elapsed: 11906.9 ms, LR: 0.0000, Loss: 0.0345 Hint loss: 7.8840
-Step 36100 (epoch 46.16), Elapsed: 11968.3 ms, LR: 0.0000, Loss: 0.0316 Hint loss: 7.9791
-Step 36200 (epoch 46.29), Elapsed: 11940.8 ms, LR: 0.0000, Loss: 0.0312 Hint loss: 7.6835
-Step 36300 (epoch 46.42), Elapsed: 11862.3 ms, LR: 0.0000, Loss: 0.0324 Hint loss: 7.9401
-Step 36400 (epoch 46.55), Elapsed: 11878.9 ms, LR: 0.0000, Loss: 0.0309 Hint loss: 7.8467
-Step 36500 (epoch 46.68), Elapsed: 11906.3 ms, LR: 0.0000, Loss: 0.0323 Hint loss: 7.8245
-Step 36600 (epoch 46.80), Elapsed: 11861.8 ms, LR: 0.0000, Loss: 0.0642 Hint loss: 8.1247
-Step 36700 (epoch 46.93), Elapsed: 11920.2 ms, LR: 0.0000, Loss: 0.0334 Hint loss: 8.1486
+[Validation] Epoch: 297.00, Elapsed: 10070.1 ms, Error: 1.14
 
-[Validation] Epoch: 47.00, Elapsed: 9412.6 ms, Error: 1.42
+Step 232300 (epoch 297.06), Elapsed: 9001.3 ms, LR: 0.0000, Loss: 0.0113 Hint loss: 4.7578
+Step 232400 (epoch 297.19), Elapsed: 8940.8 ms, LR: 0.0000, Loss: 0.0118 Hint loss: 4.8155
+Step 232500 (epoch 297.31), Elapsed: 8797.1 ms, LR: 0.0000, Loss: 0.0118 Hint loss: 4.9381
+Step 232600 (epoch 297.44), Elapsed: 8870.4 ms, LR: 0.0000, Loss: 0.0115 Hint loss: 4.9699
+Step 232700 (epoch 297.57), Elapsed: 8864.3 ms, LR: 0.0000, Loss: 0.0114 Hint loss: 5.2074
+Step 232800 (epoch 297.70), Elapsed: 8857.6 ms, LR: 0.0000, Loss: 0.0113 Hint loss: 4.8059
+Step 232900 (epoch 297.83), Elapsed: 9129.8 ms, LR: 0.0000, Loss: 0.0115 Hint loss: 4.9088
+Step 233000 (epoch 297.95), Elapsed: 8834.6 ms, LR: 0.0000, Loss: 0.0116 Hint loss: 4.9354
 
-Step 36800 (epoch 47.06), Elapsed: 11894.1 ms, LR: 0.0000, Loss: 0.0355 Hint loss: 7.7621
-Step 36900 (epoch 47.19), Elapsed: 11969.3 ms, LR: 0.0000, Loss: 0.0319 Hint loss: 7.9595
-Step 37000 (epoch 47.31), Elapsed: 11946.7 ms, LR: 0.0000, Loss: 0.0305 Hint loss: 7.8896
-Step 37100 (epoch 47.44), Elapsed: 11904.3 ms, LR: 0.0000, Loss: 0.0328 Hint loss: 7.8951
-Step 37200 (epoch 47.57), Elapsed: 11906.0 ms, LR: 0.0000, Loss: 0.0356 Hint loss: 8.0274
-Step 37300 (epoch 47.70), Elapsed: 11949.6 ms, LR: 0.0000, Loss: 0.0312 Hint loss: 7.7374
-Step 37400 (epoch 47.83), Elapsed: 11866.1 ms, LR: 0.0000, Loss: 0.0328 Hint loss: 8.0280
-Step 37500 (epoch 47.95), Elapsed: 11903.3 ms, LR: 0.0000, Loss: 0.0310 Hint loss: 7.9039
+[Validation] Epoch: 298.00, Elapsed: 10232.5 ms, Error: 1.20
 
-[Validation] Epoch: 48.00, Elapsed: 9437.3 ms, Error: 1.44
+Step 233100 (epoch 298.08), Elapsed: 8874.6 ms, LR: 0.0000, Loss: 0.0124 Hint loss: 4.7468
+Step 233200 (epoch 298.21), Elapsed: 8927.0 ms, LR: 0.0000, Loss: 0.0114 Hint loss: 4.8656
+Step 233300 (epoch 298.34), Elapsed: 8934.8 ms, LR: 0.0000, Loss: 0.0113 Hint loss: 4.9476
+Step 233400 (epoch 298.47), Elapsed: 8970.3 ms, LR: 0.0000, Loss: 0.0120 Hint loss: 4.6907
+Step 233500 (epoch 298.59), Elapsed: 8850.5 ms, LR: 0.0000, Loss: 0.0115 Hint loss: 5.1286
+Step 233600 (epoch 298.72), Elapsed: 8806.0 ms, LR: 0.0000, Loss: 0.0117 Hint loss: 5.3058
+Step 233700 (epoch 298.85), Elapsed: 8785.5 ms, LR: 0.0000, Loss: 0.0117 Hint loss: 4.9079
+Step 233800 (epoch 298.98), Elapsed: 8005.3 ms, LR: 0.0000, Loss: 0.0143 Hint loss: 4.9513
 
-Step 37600 (epoch 48.08), Elapsed: 11926.6 ms, LR: 0.0000, Loss: 0.0309 Hint loss: 8.1272
-Step 37700 (epoch 48.21), Elapsed: 11935.0 ms, LR: 0.0000, Loss: 0.0406 Hint loss: 7.7479
-Step 37800 (epoch 48.34), Elapsed: 11912.1 ms, LR: 0.0000, Loss: 0.0309 Hint loss: 7.9133
-Step 37900 (epoch 48.47), Elapsed: 11905.8 ms, LR: 0.0000, Loss: 0.0333 Hint loss: 7.9182
-Step 38000 (epoch 48.59), Elapsed: 11941.3 ms, LR: 0.0000, Loss: 0.0327 Hint loss: 7.8363
-Step 38100 (epoch 48.72), Elapsed: 11861.4 ms, LR: 0.0000, Loss: 0.0317 Hint loss: 8.0948
-Step 38200 (epoch 48.85), Elapsed: 11954.8 ms, LR: 0.0000, Loss: 0.0305 Hint loss: 8.1091
-Step 38300 (epoch 48.98), Elapsed: 11930.6 ms, LR: 0.0000, Loss: 0.0301 Hint loss: 7.7706
+[Validation] Epoch: 299.00, Elapsed: 8645.1 ms, Error: 1.26
 
-[Validation] Epoch: 49.00, Elapsed: 9410.3 ms, Error: 1.37
+Step 233900 (epoch 299.10), Elapsed: 7949.9 ms, LR: 0.0000, Loss: 0.0117 Hint loss: 4.9189
+Step 234000 (epoch 299.23), Elapsed: 7985.1 ms, LR: 0.0000, Loss: 0.0117 Hint loss: 5.0969
+Step 234100 (epoch 299.36), Elapsed: 8105.3 ms, LR: 0.0000, Loss: 0.0118 Hint loss: 5.0055
+Step 234200 (epoch 299.49), Elapsed: 8025.6 ms, LR: 0.0000, Loss: 0.0113 Hint loss: 4.7879
+Step 234300 (epoch 299.62), Elapsed: 8173.1 ms, LR: 0.0000, Loss: 0.0114 Hint loss: 4.6951
+Step 234400 (epoch 299.74), Elapsed: 8081.3 ms, LR: 0.0000, Loss: 0.0124 Hint loss: 4.9987
+Step 234500 (epoch 299.87), Elapsed: 8046.9 ms, LR: 0.0000, Loss: 0.0113 Hint loss: 5.0564
 
-Step 38400 (epoch 49.10), Elapsed: 11838.3 ms, LR: 0.0000, Loss: 0.0302 Hint loss: 8.0595
-Step 38500 (epoch 49.23), Elapsed: 11963.3 ms, LR: 0.0000, Loss: 0.0300 Hint loss: 7.8085
-Step 38600 (epoch 49.36), Elapsed: 10211.8 ms, LR: 0.0000, Loss: 0.0302 Hint loss: 8.0124
-Step 38700 (epoch 49.49), Elapsed: 10077.2 ms, LR: 0.0000, Loss: 0.0300 Hint loss: 8.0691
-Step 38800 (epoch 49.62), Elapsed: 10666.8 ms, LR: 0.0000, Loss: 0.0299 Hint loss: 8.0896
-Step 38900 (epoch 49.74), Elapsed: 10513.9 ms, LR: 0.0000, Loss: 0.0309 Hint loss: 7.8712
-Step 39000 (epoch 49.87), Elapsed: 10479.1 ms, LR: 0.0000, Loss: 0.0299 Hint loss: 7.8189
+[Validation] Epoch: 300.00, Elapsed: 8688.6 ms, Error: 1.20
 
-[Validation] Epoch: 50.00, Elapsed: 8526.5 ms, Error: 1.31
-
-Step 39100 (epoch 50.00), Elapsed: 10857.9 ms, LR: 0.0000, Loss: 0.0300 Hint loss: 7.7300
+Step 234600 (epoch 300.00), Elapsed: 8054.5 ms, LR: 0.0000, Loss: 0.0116 Hint loss: 4.8937
 ```
-

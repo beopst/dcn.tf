@@ -18,8 +18,10 @@ def top_layers(inputs):
         out = ops.max_pool(out, [fm_size,fm_size], stride=1, scope='top_gpool')
 
         out = ops.flatten(out, scope='top_flatten')
-        #out = ops.fc(out, 10, activation=None, bias=0.0, batch_norm_params=None, scope='top_logits')
-        out = ops.fc(out, 10, activation=None, scope='top_logits')
+        
+        # scale parameters are necessary for fc
+        bn_out = {'decay': 0.99, 'epsilon': 0.001, 'scale':True}
+        out = ops.fc(out, 10, activation=None, batch_norm_params=bn_out, scope='top_logits')
 
     return out
 
@@ -65,9 +67,12 @@ def identify_saliency(grads):
             use tf.nn.top_k ops to extract position indices
     """
 
-    #M = tf.sqrt(tf.reduce_sum(tf.mul(grads,grads),3))
     M = tf.sqrt(tf.reduce_sum(tf.square(grads),3)+1e-8)
-    top_k_values, top_k_idxs = tf.nn.top_k(ops.flatten(M), N_PATCHES)
+    top_k_values, top_k_idxs = tf.nn.top_k(ops.flatten(M), N_PATCHES, sorted=False)
+
+    # shuffle patch indices for batch normalization
+    top_k_idxs = tf.random_shuffle(tf.transpose(top_k_idxs))
+    top_k_idxs = tf.transpose(top_k_idxs)
 
     return top_k_values, top_k_idxs, M
 
@@ -99,8 +104,9 @@ def extract_patches(inputs, size, offsets):
 def extract_features(inputs, k_idxs, map_h):
     """Extract top k fine features
 
-       Trick.
-            use tf.image.extract_glimpse ops to get input patches
+       NOTE.
+            do not use tf.image.extract_glimpse ops to get input patches
+            (cf. https://github.com/tensorflow/tensorflow/issues/2134)
     """
 
     def _extract_feature(inputs, idxs):
@@ -110,29 +116,20 @@ def extract_features(inputs, k_idxs, map_h):
         idx_i = tf.floordiv(idxs, map_h)
         idx_j = tf.mod(idxs, map_h)
 
-        # NOTE: 
-        # calculate the center of input batches
-        # this depends on coarse layer's architecture
-        #origin_i = 2*(2*idx_i+1)+3
-        #origin_j = 2*(2*idx_j+1)+3
-
         # NOTE: the below origins are starting points, not center!
         origin_i = 2*(2*idx_i+1)+3 - 5 + 2
         origin_j = 2*(2*idx_j+1)+3 - 5 + 2
 
         origin_centers = tf.concat(1,[origin_i,origin_j])
-        #origin_centers = tf.to_float(origin_centers)
 
         # NOTE: size also depends on the architecture
         #patches = tf.image.extract_glimpse(inputs, size=[14,14], offsets=origin_centers, 
         #                                   centered=False, normalized=False)
         patches = extract_patches(inputs, size=[14,14], offsets=origin_centers)
-
-        fine_features = fine_layers(patches)
-
-        # reuse variables
-        tf.get_variable_scope().reuse_variables()
         
+        #fine_features = fine_layers(patches)
+        fine_features = []
+
         src_idxs = tf.concat(1,[idx_i,idx_j])
 
         return fine_features, src_idxs, patches
@@ -146,8 +143,12 @@ def extract_features(inputs, k_idxs, map_h):
         k_src_idxs.append(src_idx)
         k_patches.append(patches)
 
-    return k_features, k_src_idxs, k_patches
+    
+    concat_patches = tf.concat(0,k_patches)
+    concat_k_features = fine_layers(concat_patches)
+    k_features = tf.split(0,N_PATCHES,concat_k_features)
 
+    return k_features, k_src_idxs, k_patches
 
 
 def replace_features(coarse_features, fine_features, replace_idxs):
@@ -193,13 +194,6 @@ def replace_features(coarse_features, fine_features, replace_idxs):
     # this is required for hint-based training
     flat_coarse_replaced = tf.gather(flat_coarse_features, flat_fine_idxs, validate_indices=False)
 
-#    # partition valid nodes for coarse layers
-#    tmp_dim = flat_coarse_features.get_shape()[0].value
-#    partition_idxs = tf.sparse_to_dense(flat_fine_idxs,[tmp_dim,],0.0,1.0,validate_indices=False)
-#    tmp_coarse = tf.mul(flat_coarse_features,partition_idxs)
-#    tmp_fine = tf.sparse_to_dense(flat_fine_idxs,[tmp_dim,],flat_fine_features,0.0,validate_indices=False)
-#    merged = tf.add(tmp_coarse,tmp_fine)
-
     merged = tf.dynamic_stitch([tf.range(0,flat_coarse_features.get_shape()[0]),flat_fine_idxs],
             [flat_coarse_features,flat_fine_features])
 
@@ -209,9 +203,9 @@ def replace_features(coarse_features, fine_features, replace_idxs):
 
 def inference(inputs, is_training=True, scope=''):
 
-    batch_norm_params = {'decay': 0.9, 'epsilon': 0.001}
+    batch_norm_params = {'decay': 0.99, 'epsilon': 0.001}
 
-    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.0001,
+    with scopes.arg_scope([ops.conv2d, ops.fc], weight_decay=0.0005,
                           is_training=is_training, batch_norm_params=batch_norm_params):
         # get features from coarse layers
         coarse_features = coarse_layers(inputs)
@@ -224,19 +218,21 @@ def inference(inputs, is_training=True, scope=''):
         top_k_values, top_k_idxs, M = identify_saliency(coarse_grads[0])
 
         with tf.control_dependencies([top_k_idxs]):
+            top_k_idxs = tf.identity(top_k_idxs)
+            coarse_features = tf.identity(coarse_features)
             # get features from fine layers
-            fine_features, src_idxs, _ = extract_features(inputs, top_k_idxs, coarse_features_dim)
+            fine_features, src_idxs, k_patches = extract_features(inputs, top_k_idxs, coarse_features_dim)
 
-            with tf.control_dependencies(fine_features):
-                # merge two feature maps
-                merged, flat_coarse, flat_fine = replace_features(coarse_features, fine_features, src_idxs)
+            # merge two feature maps
+            merged, flat_coarse, flat_fine = replace_features(coarse_features, fine_features, src_idxs)
 
-                raw_hint_loss = tf.reduce_sum(tf.square(flat_coarse - flat_fine), name='raw_hint_loss')
-                # scale hint loss per example in batch
-                # still does not match range of 5-25 shown in figure 2 in paper???
-                hint_loss = tf.div( raw_hint_loss, inputs.get_shape()[0].value*N_PATCHES, name='objective_hint')
-               
-                final_logits = top_layers(merged)
+            raw_hint_loss = tf.reduce_sum(tf.square(flat_coarse - flat_fine), name='raw_hint_loss')
+            # scale hint loss per example in batch
+            # still does not match range of 5-25 shown in figure 2 in paper???
+            hint_loss = tf.div( raw_hint_loss, inputs.get_shape()[0].value*N_PATCHES, name='objective_hint')
+           
+            tf.get_variable_scope().reuse_variables()
+            final_logits = top_layers(merged)
 
     return final_logits, hint_loss
 
