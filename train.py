@@ -25,7 +25,7 @@ NUM_EPOCHS_PER_DECAY = 100
 INITIAL_LEARNING_RATE = 0.001
 LEARNING_RATE_DECAY = 0.1
 HINT_WEIGHT = 0.01
-GPU = 0
+GPU = 3
 ######################################################
 
 

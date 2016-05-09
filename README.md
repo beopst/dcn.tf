@@ -12,22 +12,26 @@ Dynamic Capacity Networks (DCN; http://arxiv.org/abs/1511.07838) implementation 
 |:------:|:-------------------:|
 | Coarse Model | 2.492 |
 | Fine Model | 1.070 |
-| DCN without hint | 1.438 |
-| DCN with hint | 1.197 |
+| DCN without hint (4 patches) | 1.875 |
+| DCN without hint (8 patches) | 1.438 |
+| DCN without hint (16 patches) | 1.197 |
+| DCN without hint (24 patches) | 1.069 |
+| DCN with hint (4 patches) | 1.509 |
+| DCN with hint (8 patches) | 1.197 |
+| DCN with hint (16 patches) | 1.007 |
+| DCN with hint (24 patches) | 0.933 |
 
 Validation accuracy scores are averaged over the last 10 epochs.
 
 ## Notes
 
-* It is observed that DCN outperforms Coarse Model. However, it is still worse than Fine Model regardless of using hint objective. It is verified that hint objective gives better generalization.
+* It is observed that hint objective gives better generalization. Also, validation accuracy improves as the number of patches increases. With 24 patches, DCN with hint objective outperforms Fine Model. Note that the original paper uses 8 patches.
 
-* In this benchmark, weight decay parameter was set to 0.0005, and additional weight parameter for hint objective was set to 0.01.
-
-* Adam optimizer was used. Initial learning rate was 0.001, and it was decreased a factor of 10 for every 100 epochs. Total number of epochs was 300. 
+* In this benchmark, weight decay parameter was set to 0.0005, and additional weight parameter for hint objective was set to 0.01. For training, Adam optimizer was used. Initial learning rate was 0.001, and it was decreased a factor of 10 for every 100 epochs. Total number of epochs was 300. 
 
 * Computation time issue
   
-  In this implementation, computation time for DCN is slightly lower than that of Fine Model.
+  In this implementation, computation time for DCN is slightly lower than that of Fine Model (in case of 8 patches).
    
 
 ## Logs
@@ -253,7 +257,7 @@ Step 234500 (epoch 299.87), Elapsed: 9248.9 ms, LR: 0.0000, Loss: 0.0039 Hint lo
 [Validation] Epoch: 300.00, Elapsed: 4839.8 ms, Error: 1.02
 ```
 
-* DCN without hint objective
+* DCN without hint objective (8 patches)
 ```
 Step 226800 (epoch 290.03), Elapsed: 8785.4 ms, LR: 0.0000, Loss: 0.0151 Hint loss: 140.5566
 Step 226900 (epoch 290.15), Elapsed: 8795.0 ms, LR: 0.0000, Loss: 0.0159 Hint loss: 145.1720
@@ -364,7 +368,7 @@ Step 234500 (epoch 299.87), Elapsed: 8852.7 ms, LR: 0.0000, Loss: 0.0148 Hint lo
 [Validation] Epoch: 300.00, Elapsed: 9840.2 ms, Error: 1.49
 ```
 
-* DCN with hint objective
+* DCN with hint objective (8 patches)
 ```
 Step 226800 (epoch 290.03), Elapsed: 8942.4 ms, LR: 0.0000, Loss: 0.0116 Hint loss: 4.8372
 Step 226900 (epoch 290.15), Elapsed: 8846.7 ms, LR: 0.0000, Loss: 0.0116 Hint loss: 4.8114
@@ -473,6 +477,4 @@ Step 234400 (epoch 299.74), Elapsed: 8081.3 ms, LR: 0.0000, Loss: 0.0124 Hint lo
 Step 234500 (epoch 299.87), Elapsed: 8046.9 ms, LR: 0.0000, Loss: 0.0113 Hint loss: 5.0564
 
 [Validation] Epoch: 300.00, Elapsed: 8688.6 ms, Error: 1.20
-
-Step 234600 (epoch 300.00), Elapsed: 8054.5 ms, LR: 0.0000, Loss: 0.0116 Hint loss: 4.8937
 ```

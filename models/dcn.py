@@ -7,7 +7,7 @@ from slim import losses
 import tensorflow as tf
 
 ######## Parameters ########
-N_PATCHES = 8
+N_PATCHES = 24
 ############################
 
 def top_layers(inputs):
