@@ -91,7 +91,7 @@ def batch_norm(inputs,
       if scale:
         gamma = variables.variable('gamma',
                                    params_shape,
-                                   initializer=tf.ones,
+                                   initializer=tf.ones_initializer(),
                                    trainable=trainable)
       else:
         gamma = None
@@ -106,7 +106,7 @@ def batch_norm(inputs,
                                          initializer=tf.zeros_initializer)
         moving_variance = variables.variable('moving_variance',
                                              params_shape,
-                                             initializer=tf.ones)
+                                             initializer=tf.ones_initializer())
         #moving_mean = tf.Print(moving_mean,[moving_mean],"moving_mean: ")
     if is_training:
       # Calculate the moments based on the individual batch.
